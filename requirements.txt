@@ -1,5 +1,5 @@
 streamlit==1.33.0
 numpy
 pandas
-streamlit_gsheets
 st-supabase-connection
+git+https://github.com/streamlit/gsheets-connection
