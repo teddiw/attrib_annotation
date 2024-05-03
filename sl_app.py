@@ -61,12 +61,14 @@ if (st.session_state["username"]):
              "annotated_response_ids": [],
              }).execute()
         touched_response_ids = []
+    st.session_state['touched_response_ids'] = touched_response_ids
 
     # get instances that still need annotation
     remaining_response_ids = pd.DataFrame(db_conn.table("instances_to_annotate").select("*").execute().data)
     remaining_response_ids = remaining_response_ids.sort_values(by='response_id', ascending=True)
     viable_response_ids = remaining_response_ids[~remaining_response_ids['response_id'].isin(touched_response_ids)]
-    hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), 10)]
+    st.session_state["total_tasks"] = 3
+    hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     
     # identify the instances for this hit
     st.session_state["hit_response_ids"] = hit_response_ids_df['response_id'].tolist()

@@ -55,47 +55,49 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-st.header("Task "+str(st.session_state["task_n"]+1)+"/10")
-query_container = st.empty()
-query_container.markdown('''**User Query:**\n'''+st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Question'])
-query_container = st.empty()
-unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
-query_container.markdown('''**System Response:**\n'''+unmarked_response)
-# query_container.text(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Question'])
-# st.markdown('''Happy Streamlit-ing! :balloon:''')
-st.divider()
+if ("hit_df" in st.session_state):
+    st.header("Task "+str(st.session_state["task_n"]+1)+"/"+str(st.session_state["total_tasks"]))
+    query_container = st.empty()
+    query_container.markdown('''**User Query:**\n'''+st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Question'])
+    query_container = st.empty()
+    unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
+    query_container.markdown('''**System Response:**\n'''+unmarked_response)
+    # query_container.text(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Question'])
+    # st.markdown('''Happy Streamlit-ing! :balloon:''')
+    st.divider()
 
-fluency_container = st.empty()
-fluency_rating = fluency_container.number_input(
-        "Please enter your Likert rating",
-        value=None,
-        min_value=0,
-        max_value=5,
-        key="fluency_likert"+str(st.session_state["task_n"]+1),
-        on_change=save_start_time,
-    )
-if (fluency_rating):
-    fluency_container.markdown('''Recorded :white_check_mark:''')
-    #   st.write("Fluency rating: ", fluency_rating)
-    st.session_state["fluency_rating"] = fluency_rating
-
-    utility_container = st.empty()
-    utility_rating = utility_container.number_input(
+    fluency_container = st.empty()
+    fluency_rating = fluency_container.number_input(
             "Please enter your Likert rating",
             value=None,
             min_value=0,
             max_value=5,
-            key="utility_likert"+str(st.session_state["task_n"]+1),
+            key="fluency_likert"+str(st.session_state["task_n"]+1),
             on_change=save_start_time,
         )
-    if (utility_rating):
-        utility_container.markdown('''Recorded :white_check_mark:''')
-        st.session_state["utility_rating"] = utility_rating
-        continue_container = st.empty()
-        if (continue_container.button('Continue task')):
+    if (fluency_rating):
+        fluency_container.markdown('''Recorded :white_check_mark:''')
+        # st.write("Fluency rating: ", fluency_rating)
+        st.session_state["fluency_rating"] = fluency_rating
+
+        utility_container = st.empty()
+        utility_rating = utility_container.number_input(
+                "Please enter your Likert rating",
+                value=None,
+                min_value=0,
+                max_value=5,
+                key="utility_likert"+str(st.session_state["task_n"]+1),
+                on_change=save_start_time,
+            )
+        if (utility_rating):
+            utility_container.markdown('''Recorded :white_check_mark:''')
+            st.session_state["utility_rating"] = utility_rating
+            # continue_container = st.empty()
+            # b1_press = continue_container.button('Continue task')
+            # if (b1_press):
             fluency_container.empty()
             utility_container.empty()
-            continue_container.empty()
+            # continue_container.empty()
             op = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['op']
             response_id = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['ID']
             if (op == 'Snippet'):
@@ -107,20 +109,22 @@ if (fluency_rating):
                 "op": op,
                 "response_id":int(response_id),
                 }).execute()    
+                st.session_state['touched_response_ids'] += [int(response_id)]
+                st.session_state.db_conn.table('annotators').update({'annotated_response_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
                 
                 # increment to the next task
-                if (st.session_state["task_n"]<9):
+                if (st.session_state["task_n"]<st.session_state["total_tasks"]-1):
                     st.session_state["task_n"] += 1
                     st.switch_page('pages/response_level.py')
                 # TODO else: landing page with some yayay
 
-            sentences = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Sent (cited)']
+            sentences = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Sent (cited)'])
             num_sentences = len(sentences)
             prec_results = [-1]*num_sentences
             cov_results = [-1]*num_sentences
             placeholders_prec = []
             placeholders_cov = []
-            for i in range(len(sentences)):
+            for i in range(num_sentences):
                 placeholder = st.empty()
                 placeholders_prec.append(placeholder)
                 placeholder = st.empty()
@@ -132,16 +136,17 @@ if (fluency_rating):
                 "annotator_id": st.session_state["username"], 
                 "human_fluency_rating": int(st.session_state["fluency_rating"]),
                 "human_utility_rating": int(st.session_state["utility_rating"]),
-                "n_precise_citations": st.session_state['precision_results'],
-                "is_covered": st.session_state['coverage_results'],
+                "n_precise_citations": st.session_state['prec_results'],
+                "is_covered": st.session_state['cov_results'],
                 "t2v_precision": st.session_state['prec_t2v'],
                 "t2v_coverage": st.session_state['cov_t2v'],
                 "op": op,
                 "response_id":int(response_id),
-                }).execute()    
-                
+                }).execute()  
+                st.session_state['touched_response_ids'] += [int(response_id)]
+                st.session_state.db_conn.table('annotators').update({'annotated_response_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
                 # increment to the next task
-                if (st.session_state["task_n"]<9):
+                if (st.session_state["task_n"]<st.session_state["total_tasks"]-1):
                     st.session_state["task_n"] += 1
                     st.switch_page('pages/response_level.py')
                 # TODO else: landing page with some yayay
@@ -156,17 +161,20 @@ if (fluency_rating):
                     placeholders_prec[i].markdown('''Recorded :white_check_mark:''')
                     # placeholders_prec[i].text("Precision: "+str(prec_results[i]))
                     prec_result = None
-                    cov_result = None
-                    cov_result = placeholders_cov[i].number_input(
-                                                                "Is the sentence covered?",
-                                                                value=None,
-                                                                min_value=0,
-                                                                key=str(i)+'coverage',
-                                                                on_change=save_time,
-                                                                args=(i,'cov',)
-                                                                )
+                    
+                    cov_result = placeholders_cov[i].radio(
+                                    label="Is the sentence covered?",
+                                    options=["Yes", "No"],
+                                    index=None,
+                                    key=str(i)+'coverage',
+                                    on_change=save_time,
+                                    args=(i,'cov',))
+
                     if (cov_result):
-                        cov_results[i] = cov_result
+                        if cov_result == "Yes":
+                            cov_results[i] = 1
+                        else:
+                            cov_results[i] = 1
                         # placeholders_cov[i].text("Coverage: "+str(cov_results[i]))
                         placeholders_cov[i].markdown('''Recorded :white_check_mark:''')
                         cov_result = None
@@ -191,20 +199,17 @@ if (fluency_rating):
                             # st.write(st.session_state['prec_t2v'])
                             # st.write(st.session_state['cov_t2v'])
                             return
-
+            i = 0
             prec_result = placeholders_prec[i].number_input( 
                                                         "Please enter # precise citations",
                                                         value=None,
                                                         min_value=0,
                                                         key=str(i)+'precision',
                                                         on_change=save_time,
-                                                        args=(0,'prec',)
+                                                        args=(i,'prec',)
                                                     )
-            
-            eval_next_sentence(prec_result, i)
-                
-            st.session_state['precision_results'] = prec_results
-            st.session_state['coverage_results'] = cov_results
+            if (prec_result):
+                eval_next_sentence(prec_result, i)
                 
 
 
