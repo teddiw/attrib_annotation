@@ -55,12 +55,14 @@ if (st.session_state["username"]):
             # get annotator's annotation history if they've been here before
             touched_response_ids = row['annotated_response_ids']
     if (touched_response_ids is None):
+        st.switch_page('pages/unknown_user.py')
         # add annotator if they are new
-        db_conn.table('annotators').insert({
-            "annotator_id": st.session_state["username"], 
-             "annotated_response_ids": [],
-             }).execute()
-        touched_response_ids = []
+        # db_conn.table('annotators').insert({
+        #     "annotator_id": st.session_state["username"], 
+        #      "annotated_response_ids": [],
+        #      }).execute()
+        # touched_response_ids = []
+
     st.session_state['touched_response_ids'] = touched_response_ids
 
     # get instances that still need annotation
@@ -91,7 +93,10 @@ if (st.session_state["username"]):
     rows_to_annotate = []
     for response_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
         rows_to_annotate.append(df[(df['ID']==response_id)&(df['op']==op)])
+    if (len(rows_to_annotate)==0):
+        st.switch_page('pages/no_more.py')
     hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
+    st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0
     st.switch_page('pages/response_level.py')
