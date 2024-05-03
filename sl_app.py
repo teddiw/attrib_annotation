@@ -35,7 +35,7 @@ def init_connection():
     return create_client(url, key)
 
 db_conn = init_connection()
-
+st.session_state["db_conn"] = db_conn
 ## Page configs
 st.title("Citation Quality Evaluation")
 
@@ -91,6 +91,7 @@ if (st.session_state["username"]):
         rows_to_annotate.append(df[(df['ID']==response_id)&(df['op']==op)])
     hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
     st.session_state["hit_df"] = hit_df
+    st.session_state["task_n"] = 0
     st.switch_page('pages/response_level.py')
   
 
