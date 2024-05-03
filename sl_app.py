@@ -91,7 +91,6 @@ if (st.session_state["username"]):
         rows_to_annotate.append(df[(df['ID']==response_id)&(df['op']==op)])
     hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
     st.session_state["hit_df"] = hit_df
-    breakpoint()
     st.switch_page('pages/response_level.py')
   
 
