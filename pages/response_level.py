@@ -83,21 +83,12 @@ if ("hit_df" in st.session_state):
     op = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['op']
     if (op == 'Snippet'):
         unmarked_response = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
-        unmarked_response = "\n_____________________________________________________________\n".join(unmarked_response)
+        unmarked_response = "\n\n".join(unmarked_response)
     else:
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
-    
-    # highlighted_cited_sources = [highlight(s) for s in eval(cited_sources)]
-    #     sources_container.markdown('''**Sources:**\n\n'''+"\n_____________________________________________________________\n".join(highlighted_cited_sources))
-    
-    # TODO I think we should be calling eval?
-    # if (st.session_state["hit_df"].iloc[st.session_state["task_n"]]['op']=='Snippet'):
-    #     full_response_container.markdown('''**System Response:**\n\n'''+"\n_____________________________________________________________\n".join(eval(unmarked_response)))
-    # else:
+        
     full_response_container.markdown('''**System Response:**\n'''+unmarked_response)
     sentence_container = st.empty()
-    # query_container.text(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Question'])
-    # st.markdown('''Happy Streamlit-ing! :balloon:''')
     st.divider()
 
     fluency_container = st.empty()
@@ -242,7 +233,9 @@ if ("hit_df" in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
                         if (pressed):
+                            breakpoint()
                             save_time(i,'prec',)
+                        pressed = False
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                         placeholders_prec_button[i].empty()
                         prec_results.append({"sentence_id": i, "annotations": precision_checklist})
