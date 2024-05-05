@@ -73,11 +73,20 @@ st.markdown(
     unsafe_allow_html=True,
 ) 
 
+# st.markdown("""
+# <style>
+    
+# </style>""",
+# unsafe_allow_html=True)
+
 st.markdown("""
 <style>
-    
-</style>""",
-unsafe_allow_html=True)
+.big-font {
+    font-size:14px !important;
+    font-style:italic;
+}
+</style>
+""", unsafe_allow_html=True)
 
 if ("hit_df" in st.session_state):
     st.header("Task "+str(st.session_state["task_n"]+1)+"/"+str(st.session_state["total_tasks"]))
@@ -97,36 +106,16 @@ if ("hit_df" in st.session_state):
     fluency_container = st.empty()
     fluency_options = ['1', '2', '3', '4', '5']
     fluency_rating = fluency_container.radio(
-                                        label="Please rate the fluency of the response to the query.",
+                                        label="*Please rate the fluency of the response to the query.*",
                                         options=fluency_options,
                                         index=None,
                                         key="fluency_"+str(st.session_state["task_n"]+1),
                                         )
-    # fluency_rating = fluency_container.number_input(
-    #         "Please enter your Likert rating",
-    #         value=None,
-    #         min_value=0,
-    #         max_value=5,
-    #         key="fluency_likert"+str(st.session_state["task_n"]+1),
-    #         on_change=c,
-    #         step=1
-    #     )
     if (fluency_rating):
-        # fluency_container.markdown('''Recorded :white_check_mark:''')
-        # st.write("Fluency rating: ", fluency_rating)
         utility_container = st.empty()
-        # utility_rating = utility_container.number_input(
-        #         "Please enter your Likert rating",
-        #         value=None,
-        #         min_value=0,
-        #         max_value=5,
-        #         key="utility_likert"+str(st.session_state["task_n"]+1),
-        #         on_change=save_start_time,
-        #         step=1
-        #     )
         utility_options = ['1', '2', '3', '4', '5']
         utility_rating = utility_container.radio(
-                            label="Please rate the utility of the response to the query.",
+                            label="*Please rate the utility of the response to the query.*",
                             options=utility_options,
                             index=None,
                             key="utility_"+str(st.session_state["task_n"]+1),
@@ -255,7 +244,7 @@ if ("hit_df" in st.session_state):
                             save_time = (i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
-                                        label='''Do the citation(s) in the sentence together support all claims in the sentence?''',
+                                        label='''*Do the citation(s) in the sentence together support all claims in the sentence?*''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
@@ -281,7 +270,8 @@ if ("hit_df" in st.session_state):
                                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                                     precision_checklist = []
                                 else:
-                                    placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
+                                    # placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
+                                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence, according to the sources below.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
                                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
@@ -313,7 +303,8 @@ if ("hit_df" in st.session_state):
                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                     precision_checklist = []
                 else:
-                    placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
+                    # placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
+                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence, according to the sources below.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
