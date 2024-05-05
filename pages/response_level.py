@@ -233,6 +233,7 @@ if ("hit_df" in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
                         if (pressed):
+                            breakpoint()
                             save_time(i,'prec')
                         pressed = False
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
@@ -274,7 +275,7 @@ if ("hit_df" in st.session_state):
                                 num_citations_in_sentence = len(citations)
                                 
                                 if (num_citations_in_sentence==0):
-                                    pressed = True
+                                    st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                                     precision_checklist = []
                                 else:
                                     placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
@@ -306,7 +307,7 @@ if ("hit_df" in st.session_state):
                 citations = citations_dict[str(i)]['citation_numbers']
                 num_citations_in_sentence = len(citations)
                 if (num_citations_in_sentence==0):
-                    pressed = True
+                    st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                     precision_checklist = []
                 else:
                     placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
@@ -315,7 +316,7 @@ if ("hit_df" in st.session_state):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
                     if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
-                    pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
+                pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
 
                 eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time)
                     
