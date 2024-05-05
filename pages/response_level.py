@@ -223,7 +223,7 @@ if ("hit_df" in st.session_state):
                     
                     return
 
-                def eval_next_sentence(pressed, precision_checklist, citations_dict, i):
+                def eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time):
                     if (i > 0):
                         for j in range(len(placeholders_prec[i-1])):
                             placeholders_prec[i-1][j].empty()
@@ -233,64 +233,56 @@ if ("hit_df" in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
                         if (pressed):
-                            breakpoint()
-                            save_time(i,'prec',)
+                            save_time(i,'prec')
                         pressed = False
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                         placeholders_prec_button[i].empty()
                         prec_results.append({"sentence_id": i, "annotations": precision_checklist})
-                        placeholders_prec[i][0].markdown('''Recorded :white_check_mark:''')
+                        if (len(placeholders_prec[i])>0):
+                            placeholders_prec[i][0].markdown('''Recorded :white_check_mark:''')
                         for j in range(1, len(placeholders_prec[i])):
                             placeholders_prec[i][j].empty()
                         # placeholders_prec[i].text("Precision: "+str(prec_results[i]))
-                        prec_result = -1
-                        cov_result = placeholders_cov[i].radio(
+
+                        # check if no citations
+                        num_citations_in_sentence = len(citations_dict[str(i)]['citation_numbers'])
+                        if (num_citations_in_sentence == 0):
+                            cov_result = "No"
+                            save_time = (i,'cov')
+                        else:
+                            cov_result = placeholders_cov[i].radio(
                                         label='''Do the citation(s) in the sentence together support all claims in the sentence?''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
                                         on_change=save_time,
                                         args=(i,'cov',))
-
                         if (cov_result):
                             if cov_result == "Yes":
                                 cov_results[i] = 1
                             else:
                                 cov_results[i] = 1
                             # placeholders_cov[i].text("Coverage: "+str(cov_results[i]))
-                            placeholders_cov[i].markdown('''Recorded :white_check_mark:''')
+                            # placeholders_cov[i].markdown('''Recorded :white_check_mark:''')
                             cov_result = None
 
                             i += 1
                             if (i < num_sentences):
                                 sentence = sentences[i]
-                                # cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
-                                # cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
-                                # full_response_container.markdown('''**Cited System Response:**\n'''+highlight(cited_response))
                                 sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlight(sentence))
                                 citations = citations_dict[str(i)]['citation_numbers']
                                 num_citations_in_sentence = len(citations)
-                                # prec_result = placeholders_prec[i].number_input(
-                                #                                             "How many of the citations in the sentence actually support a claim in the sentence, according to the sources below?",
-                                #                                             value=-1,
-                                #                                             min_value=-1,
-                                #                                             max_value=num_citations_in_sentence,
-                                #                                             key=str(i)+'precision',
-                                #                                             on_change=save_time,
-                                #                                             args=(i,'prec',),
-                                #                                             step=1
-                                #                                             )
-                                placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
-                                # sources_container.markdown('''**Sources:**\n'''+highlight(cited_sources))
-
-                                precision_checklist = []
-                                for j in range(num_citations_in_sentence):
-                                    precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
-                                # if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
-                                #     st.session_state['continue_press_sentence'+str(i)] = False
-                                pressed = False
-                                pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
-                                eval_next_sentence(pressed, precision_checklist, citations_dict, i)
+                                
+                                if (num_citations_in_sentence==0):
+                                    pressed = True
+                                    precision_checklist = []
+                                else:
+                                    placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
+                                    precision_checklist = []
+                                    for j in range(num_citations_in_sentence):
+                                        precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
+                                    pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
+                                eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time)
                             else:
                                 st.session_state['prec_results'] = prec_results
                                 st.session_state['cov_results'] = cov_results
@@ -313,37 +305,19 @@ if ("hit_df" in st.session_state):
                 citations_dict = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Citation Dict'])
                 citations = citations_dict[str(i)]['citation_numbers']
                 num_citations_in_sentence = len(citations)
+                if (num_citations_in_sentence==0):
+                    pressed = True
+                    precision_checklist = []
+                else:
+                    placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
+                    precision_checklist = []
+                    for j in range(num_citations_in_sentence):
+                        precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
+                    if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
+                        st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
+                    pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
 
-                prec_result = -1
-                # prec_result = placeholders_prec[i].number_input( 
-                #                                             "How many of the citations in the sentence actually support a claim in the sentence, according to the sources below?",
-                #                                             value=-1,
-                #                                             min_value=-1, # might be able to add an instance-dependent max?
-                #                                             max_value=num_citations_in_sentence,
-                #                                             key=str(i)+'precision',
-                #                                             on_change=save_time,
-                #                                             args=(i,'prec',),
-                #                                             step=1
-                #                                         )
-                # prec_result = placeholders_prec[i].radio(
-                #                         label='''How many of the citations in the sentence actually support a claim in the sentence, according to the sources below?''',
-                #                         options=citations,
-                #                         index=None,
-                #                         key=str(i)+'precision',
-                #                         on_change=save_time,
-                #                         args=(i,'prec',))                    
-                # "Select the citation(s) that support a claim in the sentence, according to the sources below.")
-
-                placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
-                precision_checklist = []
-                for j in range(num_citations_in_sentence):
-                    precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
-                if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
-                    st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
-                pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
-                # if (st.session_state['continue_press'+str(i)] or pressed):
-                #     # store as json file
-                eval_next_sentence(pressed, precision_checklist, citations_dict, i)
+                eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time)
                     
 
 
