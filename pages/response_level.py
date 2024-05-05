@@ -24,6 +24,9 @@ def format_remove_quotation_marks(output):
 
 def save_start_time():
     st.session_state["start_time"] = time.time()
+    # if (("started_first_timer" not in st.session_state) or ()):
+    #     st.session_state["start_time"] = time.time()
+    #     st.session_state["started_first_timer"] = True
 
 def save_time(i, task_str):
     # global start_time
@@ -47,6 +50,7 @@ def save_time(i, task_str):
             t2v_so_far = [seconds_elapsed]
             st.session_state['cov_t2v'] = t2v_so_far
         st.session_state["start_time"] = time.time()
+        # st.session_state["started_timer"] = True
     return
 
 start_time = 0
@@ -88,9 +92,8 @@ if ("hit_df" in st.session_state):
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
         
     full_response_container.markdown('''**System Response:**\n'''+unmarked_response)
-    sentence_container = st.empty()
     st.divider()
-
+    sentence_container = st.empty()
     fluency_container = st.empty()
     fluency_options = ['1', '2', '3', '4', '5']
     fluency_rating = fluency_container.radio(
@@ -133,7 +136,7 @@ if ("hit_df" in st.session_state):
             continue_container = st.empty()
             if ('b1_press' not in st.session_state):
                 st.session_state["b1_press"] = False
-            b1_press = continue_container.button('Continue task')
+            b1_press = continue_container.button('Continue task', on_click=save_start_time)
             if (st.session_state["b1_press"] or b1_press):
                 st.session_state["utility_rating"] = int(utility_rating)
                 st.session_state["fluency_rating"] = int(fluency_rating)
@@ -192,6 +195,7 @@ if ("hit_df" in st.session_state):
                     placeholders_cov.append(placeholder)
                     placeholder = st.empty()
                     placeholders_cov_button.append(placeholder)
+                st.divider()
 
                 def finish_up():
                     # write results to db that user annotated entire response
@@ -233,7 +237,6 @@ if ("hit_df" in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
                         if (pressed):
-                            breakpoint()
                             save_time(i,'prec')
                         pressed = False
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
@@ -294,7 +297,7 @@ if ("hit_df" in st.session_state):
                                 # st.write(st.session_state['cov_t2v'])
                                 return
                 i = 0
-                save_start_time()
+                # save_start_time()
                 sentence = sentences[i]
                 cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
