@@ -92,6 +92,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+.highlighted-font {
+    background-color: green; 
+}
+</style>
+""", unsafe_allow_html=True)
+
 if ("hit_df" in st.session_state):
     st.header("Task "+str(st.session_state["task_n"]+1)+"/"+str(st.session_state["total_tasks"]))
     subheader_container = st.empty()
@@ -108,8 +116,8 @@ if ("hit_df" in st.session_state):
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
     with col1:
         full_response_container.markdown('''**System Response:**\n'''+unmarked_response)
-        st.divider()
-        sentence_container = st.empty()
+        # st.divider()
+        # sentence_container = st.empty()
         fluency_container = st.empty()
     fluency_options = ['1', '2', '3', '4', '5']
     fluency_rating = fluency_container.radio(
@@ -198,8 +206,8 @@ if ("hit_df" in st.session_state):
                         placeholders_cov.append(placeholder)
                         placeholder = st.empty()
                         placeholders_cov_button.append(placeholder)
-                with col1:
-                    st.divider()
+                # with col1:
+                    # st.divider()
 
                 def finish_up():
                     # write results to db that user annotated entire response
@@ -263,7 +271,7 @@ if ("hit_df" in st.session_state):
                             # save_time(i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
-                                        label='''*Do the citation(s) in the sentence above together support all claims in the sentence?*''',
+                                        label='''*Do the citation(s) in the italicized sentence above together support **all** claims in the sentence?*''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
@@ -282,7 +290,10 @@ if ("hit_df" in st.session_state):
                             if (i < num_sentences):
                                 sentence = sentences[i]
                                 subheader_container.subheader("Sentence "+str(i+1)+"/"+str(len(sentences)))
-                                sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlight(sentence))
+                                highlighted_sentence = highlight(sentence)
+                                cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
+                                full_response_container.markdown('''**Cited System Response:**\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
+                                # sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlighted_sentence)
                                 citations = citations_dict[str(i)]['citation_numbers']
                                 num_citations_in_sentence = len(citations)
                                 
@@ -291,7 +302,7 @@ if ("hit_df" in st.session_state):
                                     precision_checklist = []
                                 else:
                                     requires_attrib = placeholders_requires_attrib[i].checkbox("The sentence contains information that requires citation.", value=True, key='ra_sentence'+str(i))
-                                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence above, according to the sources on the right.</p>', unsafe_allow_html=True)
+                                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
                                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
@@ -308,9 +319,9 @@ if ("hit_df" in st.session_state):
                 cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
                 subheader_container.subheader("Sentence "+str(i+1)+"/"+str(len(sentences)))
-                full_response_container.markdown('''**Cited System Response:**\n'''+highlight(cited_response))
-                sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlight(sentence))
-
+                highlighted_sentence = highlight(sentence)
+                full_response_container.markdown('''**Cited System Response:**\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
+                # sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlighted_sentence)
                 cited_sources_ls = eval(cited_sources)
                 for j in range(len(cited_sources_ls)):
                     curr_source = cited_sources_ls[j]
@@ -319,7 +330,6 @@ if ("hit_df" in st.session_state):
                     curr_source = ' '.join(curr_source_ls[1:])
                     curr_source = '**Source '+NUM_TO_ALPHA[j]+': '+curr_url+'**\n\n'+curr_source
                     cited_sources_ls[j] = curr_source
-                # highlighted_cited_sources = ['**Source '+NUM_TO_ALPHA[j]+'** \n\n'+highlight(cited_sources_ls[j]) for j in range(len(cited_sources_ls))]
                 highlighted_cited_sources = [highlight(cited_sources_ls[j]) for j in range(len(cited_sources_ls))]
                 with col2.container(height=700):
                     sources_container = st.empty()
@@ -333,7 +343,7 @@ if ("hit_df" in st.session_state):
                     requires_attrib = False
                 else:
                     requires_attrib = placeholders_requires_attrib[i].checkbox('The sentence contains information that requires citation.', value=True, key='ra_sentence'+str(i))
-                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence, in context of the full response, according to the sources on the right.</p>', unsafe_allow_html=True)
+                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
