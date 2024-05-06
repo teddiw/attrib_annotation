@@ -10,8 +10,7 @@ import random
 ssl._create_default_https_context = ssl._create_stdlib_context
 st.set_page_config(initial_sidebar_state="collapsed",
                    page_title="Username Form", 
-                   page_icon=":mag_right:",
-                   layout="wide")
+                   page_icon=":mag_right:")
 
 st.markdown(
     """
