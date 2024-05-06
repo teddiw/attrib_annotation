@@ -114,14 +114,35 @@ if ("hit_df" in st.session_state):
         unmarked_response = "\n\n".join(unmarked_response)
     else:
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
+    
+    # with col2.container(height=700):
+    #     fluency_rubric_container = st.empty()
+    #     utility_rubric_container = st.empty()
+    #     fluency_rubric_df = pd.DataFrame({'Fluency Rating':[1,2,3,4,5], 
+    #                                       'Fluency Rubric':['Frequent typos or grammatical errors and often missing natural transitions between sentences',
+    #                                                         'Some typos or grammatical errors and sometimes missing natural transitions between sentences',
+    #                                                         'No typos, minor grammatical errors, and mostly has natural transitions between sentences',
+    #                                                         'No typos, no grammatical errors, and mostly has natural transitions between sentences',
+    #                                                         'No typos, no grammatical errors, and always has natural transitions between sentences']},
+    #                                                         index=None)
+    #     utility_rubric_df = pd.DataFrame({'Utility Rating':[1,2,3,4,5], 
+    #                                       'Utility Rubric':['The response does not answer the query or contains a lot of unnecessary content.',
+    #                                                         'The response appears to partially answer the query but contains some unnecessary content.',
+    #                                                         'The response appears to partially answer the query without unnecessary content.',
+    #                                                         'The response appears to fully answer the query with some unnecessary content.',
+    #                                                         'The response appears to fully answer the query without unnecessary content.',]},
+    #                                                         index=None)
+    #     fluency_rubric_container.write(fluency_rubric_df)
+    #     utility_rubric_container.write(utility_rubric_df)
+
     with col1:
-        full_response_container.markdown('''**System Response:**\n'''+unmarked_response)
+        full_response_container.markdown('''**System Response:**\n\n'''+unmarked_response)
         # st.divider()
         # sentence_container = st.empty()
         fluency_container = st.empty()
-    fluency_options = ['1', '2', '3', '4', '5']
+    fluency_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
     fluency_rating = fluency_container.radio(
-                                        label="*1. Please rate the fluency of the response to the query, using the provided rubric.*",
+                                        label="*1. To what extent do you agree with the following:*\n\n **The response is fluent and coherent.**",
                                         options=fluency_options,
                                         index=None,
                                         key="fluency_"+str(st.session_state["task_n"]+1),
@@ -129,9 +150,9 @@ if ("hit_df" in st.session_state):
     if (fluency_rating):
         with col1:
             utility_container = st.empty()
-        utility_options = ['1', '2', '3', '4', '5']
+        utility_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
         utility_rating = utility_container.radio(
-                            label="*2. Please rate the utility of the response to the query, using the provided rubric.*",
+                            label="*2. To what extent do you agree with the following:*\n\n **If factual, the response is a useful response to the query.**",
                             options=utility_options,
                             index=None,
                             key="utility_"+str(st.session_state["task_n"]+1),
@@ -143,8 +164,8 @@ if ("hit_df" in st.session_state):
                 st.session_state["b1_press"] = False
             b1_press = continue_container.button('Continue task', on_click=save_start_time)
             if (st.session_state["b1_press"] or b1_press):
-                st.session_state["utility_rating"] = int(utility_rating)
-                st.session_state["fluency_rating"] = int(fluency_rating)
+                st.session_state["utility_rating"] = int(utility_rating[0])
+                st.session_state["fluency_rating"] = int(fluency_rating[0])
                 st.session_state["b1_press"] = True
                 fluency_container.empty()
                 utility_container.empty()
@@ -153,7 +174,7 @@ if ("hit_df" in st.session_state):
                 response_id = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['ID']
                 if (op == 'Snippet'):
                     # write results to db
-                    st.session_state.db_conn.table('annotations').insert({
+                    st.session_state.db_conn.table(st.session_state['annotations_db']).insert({
                     "annotator_id": st.session_state["username"], 
                     "human_fluency_rating": int(st.session_state["fluency_rating"]),
                     "human_utility_rating": int(st.session_state["utility_rating"]),
@@ -211,7 +232,7 @@ if ("hit_df" in st.session_state):
 
                 def finish_up():
                     # write results to db that user annotated entire response
-                    st.session_state.db_conn.table('annotations').insert({
+                    st.session_state.db_conn.table(st.session_state['annotations_db']).insert({
                     "annotator_id": st.session_state["username"], 
                     "human_fluency_rating": int(st.session_state["fluency_rating"]),
                     "human_utility_rating": int(st.session_state["utility_rating"]),
@@ -271,7 +292,7 @@ if ("hit_df" in st.session_state):
                             # save_time(i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
-                                        label='''*3. Do the citation(s) in the italicized sentence above together support **all** claims in the sentence?*''',
+                                        label='''*3. Do the citation(s) in the italicized sentence above together support **all** information in the sentence?*''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
@@ -292,7 +313,7 @@ if ("hit_df" in st.session_state):
                                 subheader_container.subheader("Sentence "+str(i+1)+"/"+str(len(sentences)))
                                 highlighted_sentence = highlight(sentence)
                                 cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
-                                full_response_container.markdown('''**Cited System Response:**\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
+                                full_response_container.markdown('''**Cited System Response:**\n\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
                                 # sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlighted_sentence)
                                 citations = citations_dict[str(i)]['citation_numbers']
                                 num_citations_in_sentence = len(citations)
@@ -302,7 +323,7 @@ if ("hit_df" in st.session_state):
                                     precision_checklist = []
                                 else:
                                     requires_attrib = placeholders_requires_attrib[i].checkbox("2. The sentence contains information that requires citation.", value=True, key='ra_sentence'+str(i))
-                                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
+                                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports information in the italicized sentence above, according to the sources on the right.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
                                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
@@ -320,7 +341,7 @@ if ("hit_df" in st.session_state):
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
                 subheader_container.subheader("Sentence "+str(i+1)+"/"+str(len(sentences)))
                 highlighted_sentence = highlight(sentence)
-                full_response_container.markdown('''**Cited System Response:**\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
+                full_response_container.markdown('''**Cited System Response:**\n\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
                 # sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlighted_sentence)
                 cited_sources_ls = eval(cited_sources)
                 for j in range(len(cited_sources_ls)):
@@ -343,7 +364,7 @@ if ("hit_df" in st.session_state):
                     requires_attrib = False
                 else:
                     requires_attrib = placeholders_requires_attrib[i].checkbox('2. The sentence contains information that requires citation.', value=True, key='ra_sentence'+str(i))
-                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
+                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports information in the italicized sentence above, according to the sources on the right.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))

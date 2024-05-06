@@ -23,10 +23,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Connect to google sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read()
-
 # Connect to supabase
 @st.cache_resource
 def init_connection():
@@ -47,6 +43,18 @@ st.session_state["username"] = st.text_input(
 
 if (st.session_state["username"]):
 
+    # Connect to google sheets
+    if ("Practice" in st.session_state["username"]):
+        conn = st.connection("gsheets_practice", type=GSheetsConnection)
+        st.session_state['annotations_db'] = 'annotations_practice'
+        instances_to_annotate = 'instances_to_annotate_practice'
+        df = conn.read()
+    else:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        instances_to_annotate = 'instances_to_annotate'
+        st.session_state['annotations_db'] = 'annotations'
+        df = conn.read()
+
     # get annotator's history
     annotator_rows = db_conn.table("annotators").select("*").execute()
     touched_response_ids = None
@@ -64,7 +72,7 @@ if (st.session_state["username"]):
     st.session_state['touched_response_ids'] = touched_response_ids
 
     # get instances that still need annotation
-    remaining_response_ids = pd.DataFrame(db_conn.table("instances_to_annotate").select("*").execute().data)
+    remaining_response_ids = pd.DataFrame(db_conn.table(instances_to_annotate).select("*").execute().data)
     remaining_response_ids = remaining_response_ids.sort_values(by='query_id', ascending=True)
     viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
     st.session_state["total_tasks"] = 5
@@ -81,10 +89,10 @@ if (st.session_state["username"]):
         # remove op from instances_to_annotate
         if (len(remaining_ops) == 1):
             # remove row from instances_to_annotate
-            db_conn.table('instances_to_annotate').delete().eq('query_id', response_id).execute()
+            db_conn.table(instances_to_annotate).delete().eq('query_id', response_id).execute()
         else:
             remaining_ops.remove(sampled_op) 
-            db_conn.table('instances_to_annotate').update({'ops': remaining_ops}).eq('query_id', response_id).execute()
+            db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', response_id).execute()
     st.session_state["hit_ops"] = hit_op_ls
 
     # form the dataframe of instance info for this hit
