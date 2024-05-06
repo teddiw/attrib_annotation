@@ -158,10 +158,10 @@ if ("hit_df" in st.session_state):
                     "human_fluency_rating": int(st.session_state["fluency_rating"]),
                     "human_utility_rating": int(st.session_state["utility_rating"]),
                     "op": op,
-                    "response_id":int(response_id),
+                    "query_id":int(response_id),
                     }).execute()    
                     st.session_state['touched_response_ids'] += [int(response_id)]
-                    st.session_state.db_conn.table('annotators').update({'annotated_response_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
+                    st.session_state.db_conn.table('annotators').update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
                     
                     # reset fluency/utility button press
                     st.session_state["b1_press"] = False
@@ -220,11 +220,11 @@ if ("hit_df" in st.session_state):
                     "t2v_precision": st.session_state['prec_t2v'],
                     "t2v_coverage": st.session_state['cov_t2v'],
                     "op": op,
-                    "response_id":int(response_id),
+                    "query_id":int(response_id),
                     "requires_attrib":st.session_state['requires_attrib_results']
                     }).execute()  
                     st.session_state['touched_response_ids'] += [int(response_id)]
-                    st.session_state.db_conn.table('annotators').update({'annotated_response_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
+                    st.session_state.db_conn.table('annotators').update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
                     
                     # reset button presses
                     st.session_state["b1_press"] = False

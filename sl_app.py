@@ -50,52 +50,55 @@ if (st.session_state["username"]):
     # get annotator's history
     annotator_rows = db_conn.table("annotators").select("*").execute()
     touched_response_ids = None
+    promised_query_ids = []
+    promised_ops = []
     for row in annotator_rows.data:
         if (row['annotator_id']==st.session_state["username"]):
             # get annotator's annotation history if they've been here before
-            touched_response_ids = row['annotated_response_ids']
+            touched_response_ids = row['annotated_query_ids']
+            promised_query_ids = row['promised_query_ids']
+            promised_ops = row['promised_ops']
     if (touched_response_ids is None):
         st.switch_page('pages/unknown_user.py')
-        # add annotator if they are new
-        # db_conn.table('annotators').insert({
-        #     "annotator_id": st.session_state["username"], 
-        #      "annotated_response_ids": [],
-        #      }).execute()
-        # touched_response_ids = []
 
     st.session_state['touched_response_ids'] = touched_response_ids
 
     # get instances that still need annotation
     remaining_response_ids = pd.DataFrame(db_conn.table("instances_to_annotate").select("*").execute().data)
-    remaining_response_ids = remaining_response_ids.sort_values(by='response_id', ascending=True)
-    viable_response_ids = remaining_response_ids[~remaining_response_ids['response_id'].isin(touched_response_ids)]
+    remaining_response_ids = remaining_response_ids.sort_values(by='query_id', ascending=True)
+    viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
     st.session_state["total_tasks"] = 3
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     
     # identify the instances for this hit
-    st.session_state["hit_response_ids"] = hit_response_ids_df['response_id'].tolist()
+    st.session_state["hit_response_ids"] = hit_response_ids_df['query_id'].tolist()
     hit_op_ls = []
     for i in range(len(hit_response_ids_df)):
         remaining_ops = hit_response_ids_df.iloc[i]['ops']
         sampled_op = random.sample(remaining_ops, 1)[0]
         hit_op_ls.append(sampled_op)
-        response_id = hit_response_ids_df.iloc[i]['response_id']
+        response_id = hit_response_ids_df.iloc[i]['query_id']
         # remove op from instances_to_annotate
         if (len(remaining_ops) == 1):
             # remove row from instances_to_annotate
-            db_conn.table('instances_to_annotate').delete().eq('response_id', response_id).execute()
+            db_conn.table('instances_to_annotate').delete().eq('query_id', response_id).execute()
         else:
             remaining_ops.remove(sampled_op) 
-            db_conn.table('instances_to_annotate').update({'ops': remaining_ops}).eq('response_id', response_id).execute()
+            db_conn.table('instances_to_annotate').update({'ops': remaining_ops}).eq('query_id', response_id).execute()
     st.session_state["hit_ops"] = hit_op_ls
 
     # form the dataframe of instance info for this hit
     rows_to_annotate = []
-    for response_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
-        rows_to_annotate.append(df[(df['ID']==response_id)&(df['op']==op)])
+    for query_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
+        rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
     if (len(rows_to_annotate)==0):
         st.switch_page('pages/no_more.py')
     hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
+
+    promised_query_ids.append(st.session_state["hit_response_ids"])
+    promised_ops.append(st.session_state["hit_ops"])
+    db_conn.table('annotators').update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
+    
     st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0
