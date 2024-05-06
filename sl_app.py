@@ -40,7 +40,7 @@ st.session_state["db_conn"] = db_conn
 st.title("Citation Quality Evaluation")
 
 st.session_state["username"] = st.text_input(
-        "Please enter your WorkerID",
+        "Please enter your UserID",
         key="get_username",
         max_chars=20,
     )

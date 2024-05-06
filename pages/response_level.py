@@ -121,7 +121,7 @@ if ("hit_df" in st.session_state):
         fluency_container = st.empty()
     fluency_options = ['1', '2', '3', '4', '5']
     fluency_rating = fluency_container.radio(
-                                        label="*Please rate the fluency of the response to the query.*",
+                                        label="*1. Please rate the fluency of the response to the query, using the provided rubric.*",
                                         options=fluency_options,
                                         index=None,
                                         key="fluency_"+str(st.session_state["task_n"]+1),
@@ -131,7 +131,7 @@ if ("hit_df" in st.session_state):
             utility_container = st.empty()
         utility_options = ['1', '2', '3', '4', '5']
         utility_rating = utility_container.radio(
-                            label="*Please rate the utility of the response to the query.*",
+                            label="*2. Please rate the utility of the response to the query, using the provided rubric.*",
                             options=utility_options,
                             index=None,
                             key="utility_"+str(st.session_state["task_n"]+1),
@@ -271,7 +271,7 @@ if ("hit_df" in st.session_state):
                             # save_time(i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
-                                        label='''*Do the citation(s) in the italicized sentence above together support **all** claims in the sentence?*''',
+                                        label='''*3. Do the citation(s) in the italicized sentence above together support **all** claims in the sentence?*''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
@@ -301,8 +301,8 @@ if ("hit_df" in st.session_state):
                                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                                     precision_checklist = []
                                 else:
-                                    requires_attrib = placeholders_requires_attrib[i].checkbox("The sentence contains information that requires citation.", value=True, key='ra_sentence'+str(i))
-                                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
+                                    requires_attrib = placeholders_requires_attrib[i].checkbox("2. The sentence contains information that requires citation.", value=True, key='ra_sentence'+str(i))
+                                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
                                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
@@ -342,8 +342,8 @@ if ("hit_df" in st.session_state):
                     precision_checklist = []
                     requires_attrib = False
                 else:
-                    requires_attrib = placeholders_requires_attrib[i].checkbox('The sentence contains information that requires citation.', value=True, key='ra_sentence'+str(i))
-                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
+                    requires_attrib = placeholders_requires_attrib[i].checkbox('2. The sentence contains information that requires citation.', value=True, key='ra_sentence'+str(i))
+                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports a claim made in the italicized sentence according to the sources on the right.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
