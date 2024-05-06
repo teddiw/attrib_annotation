@@ -101,7 +101,11 @@ if (st.session_state["username"]):
         rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
     if (len(rows_to_annotate)==0):
         st.switch_page('pages/no_more.py')
-    hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
+    
+    if ("Practice" in st.session_state["username"]):
+        hit_df = df.iloc[:5]
+    else:
+        hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
 
     promised_query_ids.append(st.session_state["hit_response_ids"])
     promised_ops.append(st.session_state["hit_ops"])
