@@ -41,15 +41,8 @@ def format_remove_quotation_marks(output):
 
 def save_start_time():
     st.session_state["start_time"] = time.time()
-    # if (("started_first_timer" not in st.session_state) or ()):
-    #     st.session_state["start_time"] = time.time()
-    #     st.session_state["started_first_timer"] = True
 
 def save_time(i, task_str):
-    # global start_time
-    # st.write(task_str)
-    # st.write('start time: ', st.session_state["start_time"])
-    # st.write('curr time: ', time.time())
     seconds_elapsed = time.time() - st.session_state["start_time"]
     if (task_str == 'prec'):
         if ('prec_t2v' in st.session_state):
@@ -89,12 +82,6 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 ) 
-
-# st.markdown("""
-# <style>
-    
-# </style>""",
-# unsafe_allow_html=True)
 
 st.markdown("""
 <style>
@@ -138,7 +125,6 @@ if ("hit_df" in st.session_state):
                             key="utility_"+str(st.session_state["task_n"]+1),
                             )
         if (utility_rating):
-            # utility_container.markdown('''Recorded :white_check_mark:''')
             continue_container = st.empty()
             if ('b1_press' not in st.session_state):
                 st.session_state["b1_press"] = False
@@ -182,6 +168,8 @@ if ("hit_df" in st.session_state):
                 num_sentences = len(sentences)
                 prec_results = []
                 cov_results = [-1]*num_sentences
+                requires_attrib_results = []
+                placeholders_requires_attrib = []
                 placeholders_prec = {}
                 placeholders_prec_text = []
                 placeholders_cov = []
@@ -199,6 +187,8 @@ if ("hit_df" in st.session_state):
                     placeholder = st.empty()
                     placeholders_prec_button.append(placeholder)
                     placeholder = st.empty()
+                    placeholder = st.empty()
+                    placeholders_requires_attrib.append(placeholder)
                     placeholders_cov.append(placeholder)
                     placeholder = st.empty()
                     placeholders_cov_button.append(placeholder)
@@ -216,6 +206,7 @@ if ("hit_df" in st.session_state):
                     "t2v_coverage": st.session_state['cov_t2v'],
                     "op": op,
                     "response_id":int(response_id),
+                    "requires_attrib":st.session_state['requires_attrib_results']
                     }).execute()  
                     st.session_state['touched_response_ids'] += [int(response_id)]
                     st.session_state.db_conn.table('annotators').update({'annotated_response_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
@@ -235,12 +226,13 @@ if ("hit_df" in st.session_state):
                     
                     return
 
-                def eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time):
+                def eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time):
                     if (i > 0):
                         for j in range(len(placeholders_prec[i-1])):
                             placeholders_prec[i-1][j].empty()
                         placeholders_cov[i-1].empty()
                         placeholders_prec_text[i-1].empty()
+                        placeholders_requires_attrib[i-1].empty()
                     if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
@@ -250,20 +242,20 @@ if ("hit_df" in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                         placeholders_prec_button[i].empty()
                         prec_results.append({"sentence_id": i, "annotations": precision_checklist})
+                        requires_attrib_results.append(requires_attrib)
                         if (len(placeholders_prec[i])>0):
                             placeholders_prec[i][0].markdown('''Recorded :white_check_mark:''')
                         for j in range(1, len(placeholders_prec[i])):
                             placeholders_prec[i][j].empty()
-                        # placeholders_prec[i].text("Precision: "+str(prec_results[i]))
 
                         # check if no citations
                         num_citations_in_sentence = len(citations_dict[str(i)]['citation_numbers'])
                         if (num_citations_in_sentence == 0):
                             cov_result = "No"
-                            save_time = (i,'cov')
+                            # save_time(i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
-                                        label='''*Do the citation(s) in the sentence together support all claims in the sentence?*''',
+                                        label='''*Do the citation(s) in the sentence above together support all claims in the sentence?*''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
@@ -289,24 +281,20 @@ if ("hit_df" in st.session_state):
                                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                                     precision_checklist = []
                                 else:
-                                    # placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
-                                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence, according to the sources below.</p>', unsafe_allow_html=True)
+                                    requires_attrib = placeholders_requires_attrib[i].checkbox("The sentence contains information that requires citation.", value=True, key='ra_sentence'+str(i))
+                                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence above, according to the sources below.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
                                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
                                     pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
-                                eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time)
+                                eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time)
                             else:
                                 st.session_state['prec_results'] = prec_results
                                 st.session_state['cov_results'] = cov_results
+                                st.session_state['requires_attrib_results'] = requires_attrib_results
                                 finish_up()
-                                # st.write(st.session_state['prec_results'])
-                                # st.write(st.session_state['cov_results'])
-                                # st.write(st.session_state['prec_t2v'])
-                                # st.write(st.session_state['cov_t2v'])
                                 return
                 i = 0
-                # save_start_time()
                 sentence = sentences[i]
                 cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
@@ -321,9 +309,10 @@ if ("hit_df" in st.session_state):
                 if (num_citations_in_sentence==0):
                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                     precision_checklist = []
+                    requires_attrib = False
                 else:
-                    # placeholders_prec_text[i].markdown('''*Please select each citation that supports a claim in the sentence.*''')
-                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence, according to the sources below.</p>', unsafe_allow_html=True)
+                    requires_attrib = placeholders_requires_attrib[i].checkbox('The sentence contains information that requires citation.', value=True, key='ra_sentence'+str(i))
+                    placeholders_prec_text[i].markdown('<p class="big-font">Please select each citation that supports a claim in the sentence above, according to the sources below.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
@@ -331,7 +320,7 @@ if ("hit_df" in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                 pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
 
-                eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time)
+                eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time)
                     
 
 
