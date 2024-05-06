@@ -3,12 +3,29 @@ import pandas as pd
 import sys
 import time
 
-# COLORS = {0:'\033[92m', 1:'\033[96m', 2:'\033[95m', 3:'\033[1;31;60m', 4:'\033[102m', 5:'\033[1;35;40m', 6:'\033[0;30;47m', 7:'\033[0;33;47m', 8:'\033[0;34;47m', 9:'\033[0;31;47m', 10:'\033[0m', 11:'\033[1m'}
+# OLD_COLORS = {0:'\033[92m', 1:'\033[96m', 2:'\033[95m', 3:'\033[1;31;60m', 4:'\033[102m', 5:'\033[1;35;40m', 6:'\033[0;30;47m', 7:'\033[0;33;47m', 8:'\033[0;34;47m', 9:'\033[0;31;47m', 10:'\033[0m', 11:'\033[1m'}
 COLORS = {'\x1b[92m':':green[', '\x1b[96m':':orange[', '\x1b[95m':':red[', '\x1b[1;31;60m':':blue[', '\x1b[102m':':violet[', '\x1b[1;35;40m':':grey[', '\x1b[0;30;47m':':rainbow[', '\x1b[0;33;47m':':orange[', '\x1b[0;34;47m':':blue[', '\x1b[0;31;47m':':red[', '\x1b[0m':']'}
+MD_IDX_TO_MD_COLORS = {0:':orange[', 1:':blue[', 2:':green[', 3:':red[', 4:':rainbown[', 5:':violet[', 6:':grey[', 7:':orange[', 8:':blue[', 9:':green['}
+
+def get_md_color(ansi_escape_sequence):
+    if ('ANSI_TO_MD_IDX' not in st.session_state):
+        st.session_state['ANSI_TO_MD_IDX'] = {}
+    if (ansi_escape_sequence == '\x1b[0m'):
+        return ']'
+    if (len(st.session_state["ANSI_TO_MD_IDX"]) == 0):
+        st.session_state["ANSI_TO_MD_IDX"][ansi_escape_sequence] = 0
+    if (ansi_escape_sequence not in st.session_state["ANSI_TO_MD_IDX"].keys()):
+        st.session_state["ANSI_TO_MD_IDX"][ansi_escape_sequence] = max(st.session_state["ANSI_TO_MD_IDX"].values())+1
+    md_idx = st.session_state["ANSI_TO_MD_IDX"][ansi_escape_sequence]
+    return MD_IDX_TO_MD_COLORS[md_idx]
 
 def highlight(text):
+    # for ansi_escape_sequence in COLORS.keys():
+    #     text = text.replace(ansi_escape_sequence, COLORS[ansi_escape_sequence])
     for ansi_escape_sequence in COLORS.keys():
-        text = text.replace(ansi_escape_sequence, COLORS[ansi_escape_sequence])
+        if (ansi_escape_sequence in text):
+            md_color = get_md_color(ansi_escape_sequence)
+            text = text.replace(ansi_escape_sequence, md_color)
     return text
 
 def format_remove_quotation_marks(output):
@@ -155,6 +172,7 @@ if ("hit_df" in st.session_state):
                         st.session_state["task_n"] += 1
                         st.session_state['prec_t2v'] = []
                         st.session_state['cov_t2v'] = []
+                        st.session_state['ANSI_TO_MD_IDX'] = {}
                         st.switch_page('pages/response_level.py')
                     else:
                         st.switch_page('pages/done.py')
@@ -210,6 +228,7 @@ if ("hit_df" in st.session_state):
                         st.session_state["task_n"] += 1
                         st.session_state['prec_t2v'] = []
                         st.session_state['cov_t2v'] = []
+                        st.session_state['ANSI_TO_MD_IDX'] = {}
                         st.switch_page('pages/response_level.py')
                     else:
                         st.switch_page('pages/done.py')
