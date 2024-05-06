@@ -67,7 +67,7 @@ if (st.session_state["username"]):
     remaining_response_ids = pd.DataFrame(db_conn.table("instances_to_annotate").select("*").execute().data)
     remaining_response_ids = remaining_response_ids.sort_values(by='query_id', ascending=True)
     viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
-    st.session_state["total_tasks"] = 3
+    st.session_state["total_tasks"] = 5
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     
     # identify the instances for this hit
