@@ -289,7 +289,6 @@ if ("hit_df" in st.session_state):
                         num_citations_in_sentence = len(citations_dict[str(i)]['citation_numbers'])
                         if (num_citations_in_sentence == 0):
                             cov_result = "No"
-                            # save_time(i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
                                         label='''*3. Do the sources of the citation(s) in the italicized sentence together support **all** information in the sentence?*''',
@@ -360,6 +359,10 @@ if ("hit_df" in st.session_state):
                 num_citations_in_sentence = len(citations)
                 if (num_citations_in_sentence==0):
                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
+                    if ('prec_t2v' not in st.session_state):
+                        st.session_state['prec_t2v'] = []
+                    if ('cov_t2v' not in st.session_state):
+                        st.session_state['cov_t2v'] = []
                     precision_checklist = []
                     requires_attrib = False
                 else:
