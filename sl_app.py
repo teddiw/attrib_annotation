@@ -78,33 +78,35 @@ if (st.session_state["username"]):
     st.session_state["total_tasks"] = 5
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     
-    # identify the instances for this hit
-    st.session_state["hit_response_ids"] = hit_response_ids_df['query_id'].tolist()
-    hit_op_ls = []
-    for i in range(len(hit_response_ids_df)):
-        remaining_ops = hit_response_ids_df.iloc[i]['ops']
-        sampled_op = random.sample(remaining_ops, 1)[0]
-        hit_op_ls.append(sampled_op)
-        response_id = hit_response_ids_df.iloc[i]['query_id']
-        # remove op from instances_to_annotate
-        if (len(remaining_ops) == 1):
-            # remove row from instances_to_annotate
-            db_conn.table(instances_to_annotate).delete().eq('query_id', response_id).execute()
-        else:
-            remaining_ops.remove(sampled_op) 
-            db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', response_id).execute()
-    st.session_state["hit_ops"] = hit_op_ls
-
-    # form the dataframe of instance info for this hit
-    rows_to_annotate = []
-    for query_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
-        rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
-    if (len(rows_to_annotate)==0):
-        st.switch_page('pages/no_more.py')
-    
     if ("Practice" in st.session_state["username"]):
         hit_df = df.iloc[:5]
+        st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
+        st.session_state["hit_ops"] = hit_df['op'].tolist()
     else:
+        # identify the instances for this hit
+        st.session_state["hit_response_ids"] = hit_response_ids_df['query_id'].tolist()
+        hit_op_ls = []
+        for i in range(len(hit_response_ids_df)):
+            remaining_ops = hit_response_ids_df.iloc[i]['ops']
+            sampled_op = random.sample(remaining_ops, 1)[0]
+            hit_op_ls.append(sampled_op)
+            response_id = hit_response_ids_df.iloc[i]['query_id']
+            # remove op from instances_to_annotate
+            if (len(remaining_ops) == 1):
+                # remove row from instances_to_annotate
+                db_conn.table(instances_to_annotate).delete().eq('query_id', response_id).execute()
+            else:
+                remaining_ops.remove(sampled_op) 
+                db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', response_id).execute()
+        st.session_state["hit_ops"] = hit_op_ls
+
+        # form the dataframe of instance info for this hit
+        rows_to_annotate = []
+        for query_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
+            rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
+        if (len(rows_to_annotate)==0):
+            st.switch_page('pages/no_more.py')
+    
         hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
 
     promised_query_ids.append(st.session_state["hit_response_ids"])

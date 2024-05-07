@@ -152,7 +152,7 @@ if ("hit_df" in st.session_state):
             utility_container = st.empty()
         utility_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
         utility_rating = utility_container.radio(
-                            label="*2. To what extent do you agree with the following:*\n\n **If factual, the response is a useful response to the query.**",
+                            label="*2. To what extent do you agree with the following:*\n\n **If you assume the information is factual, the response is a useful answer to the query.**",
                             options=utility_options,
                             index=None,
                             key="utility_"+str(st.session_state["task_n"]+1),
@@ -292,7 +292,7 @@ if ("hit_df" in st.session_state):
                             # save_time(i,'cov')
                         else:
                             cov_result = placeholders_cov[i].radio(
-                                        label='''*3. Do the citation(s) in the italicized sentence above together support **all** information in the sentence?*''',
+                                        label='''*3. Do the sources of the citation(s) in the italicized sentence together support **all** information in the sentence?*''',
                                         options=["Yes", "No"],
                                         index=None,
                                         key=str(i)+'coverage',
@@ -323,7 +323,7 @@ if ("hit_df" in st.session_state):
                                     precision_checklist = []
                                 else:
                                     requires_attrib = placeholders_requires_attrib[i].checkbox("2. The sentence contains information that requires citation.", value=True, key='ra_sentence'+str(i))
-                                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports information in the italicized sentence above, according to the sources on the right.</p>', unsafe_allow_html=True)
+                                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation who\'s source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
                                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
@@ -364,7 +364,7 @@ if ("hit_df" in st.session_state):
                     requires_attrib = False
                 else:
                     requires_attrib = placeholders_requires_attrib[i].checkbox('2. The sentence contains information that requires citation.', value=True, key='ra_sentence'+str(i))
-                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation that supports information in the italicized sentence above, according to the sources on the right.</p>', unsafe_allow_html=True)
+                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation who\'s source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
                         precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
