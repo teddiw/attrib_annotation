@@ -301,7 +301,7 @@ if ("hit_df" in st.session_state):
                             if cov_result == "Yes":
                                 cov_results[i] = 1
                             else:
-                                cov_results[i] = 1
+                                cov_results[i] = 0
                             # placeholders_cov[i].text("Coverage: "+str(cov_results[i]))
                             # placeholders_cov[i].markdown('''Recorded :white_check_mark:''')
                             cov_result = None
