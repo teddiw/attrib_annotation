@@ -19,13 +19,19 @@ def get_md_color(ansi_escape_sequence):
     md_idx = st.session_state["ANSI_TO_MD_IDX"][ansi_escape_sequence]
     return MD_IDX_TO_MD_COLORS[md_idx]
 
+def clear_ansi(text):
+    for ansi_escape_sequence in COLORS.keys():
+        if (ansi_escape_sequence in text):
+            text = text.replace(ansi_escape_sequence, '')
+    return text
+
 def highlight(text):
     # for ansi_escape_sequence in COLORS.keys():
     #     text = text.replace(ansi_escape_sequence, COLORS[ansi_escape_sequence])
     for ansi_escape_sequence in COLORS.keys():
         if (ansi_escape_sequence in text):
             md_color = get_md_color(ansi_escape_sequence)
-            text = text.replace(ansi_escape_sequence, md_color)
+            text = text.replace(ansi_escape_sequence, '')# md_color)
     return text
 
 def format_remove_quotation_marks(output):
@@ -78,27 +84,26 @@ st.markdown(
     button.step-down {display: none;}
     div[data-baseweb] {border-radius: 4px;}
 
-</style>
-""",
-    unsafe_allow_html=True,
-) 
+    p {
+    font-size:18px;
+    }
 
-st.markdown("""
-<style>
-.big-font {
+    .orange-highlight {
+        background-color: hsla(42, 100%, 51%, 0.75);
+    }
+
+    .big-font {
     font-size:14px !important;
-    font-style:italic;
-}
-</style>
-""", unsafe_allow_html=True)
+    font-style:italic;  
+    }
 
-st.markdown("""
-<style>
-.highlighted-font {
+    .highlighted-font {
     background-color: green; 
-}
+    }
+
 </style>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True,
+) 
 
 if ("hit_df" in st.session_state):
     st.header("Task "+str(st.session_state["task_n"]+1)+"/"+str(st.session_state["total_tasks"]))
@@ -209,6 +214,7 @@ if ("hit_df" in st.session_state):
                 placeholders_cov = []
                 placeholders_prec_button = []
                 placeholders_cov_button = []
+                placeholders_sources = []
                 citations_dict = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Citation Dict'])
                 for i in range(num_sentences):
                     with col1:
@@ -227,8 +233,10 @@ if ("hit_df" in st.session_state):
                         placeholders_cov.append(placeholder)
                         placeholder = st.empty()
                         placeholders_cov_button.append(placeholder)
-                # with col1:
-                    # st.divider()
+                    # with col2:
+                    #     placeholder = st.empty()
+                    #     placeholders_sources.append(placeholder)
+
 
                 def finish_up():
                     # write results to db that user annotated entire response
@@ -262,13 +270,11 @@ if ("hit_df" in st.session_state):
                     
                     return
 
-                def eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time):
+                def eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time, col2_container, sources_placeholder):
                     if (i > 0):
-                        # for j in range(len(placeholders_prec[i-1])):
-                        #     placeholders_prec[i-1][j].empty()
-                        # placeholders_prec_text[i-1].empty()
                         placeholders_requires_attrib[i-1].empty()
                         placeholders_cov[i-1].empty()
+                        
                     if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
@@ -302,21 +308,26 @@ if ("hit_df" in st.session_state):
                                 cov_results[i] = 1
                             else:
                                 cov_results[i] = 0
-                            # placeholders_cov[i].text("Coverage: "+str(cov_results[i]))
-                            # placeholders_cov[i].markdown('''Recorded :white_check_mark:''')
+                            
                             cov_result = None
 
                             i += 1
                             if (i < num_sentences):
                                 sentence = sentences[i]
                                 subheader_container.subheader("Sentence "+str(i+1)+"/"+str(len(sentences)))
-                                highlighted_sentence = highlight(sentence)
                                 cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
-                                full_response_container.markdown('''**Cited System Response:**\n\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
+                                sentence = clear_ansi(sentence)
+                                full_response_container.markdown("<p>Cited System Response:\n\n"+clear_ansi(cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")+"</p>", unsafe_allow_html=True)
+                                # full_response_container.markdown('''**Cited System Response:**\n\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
                                 # sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlighted_sentence)
                                 citations = citations_dict[str(i)]['citation_numbers']
-                                num_citations_in_sentence = len(citations)
+                                cited_sources_ls = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)'])
+                                highlighted_cited_sources = get_cited_sources_for_sentence(cited_sources_ls, citations)
                                 
+                                with col2_container:
+                                    sources_placeholder.write("\n_____________________________________________________________\n".join(highlighted_cited_sources), unsafe_allow_html=True)
+
+                                num_citations_in_sentence = len(citations)
                                 if (num_citations_in_sentence==0):
                                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                                     precision_checklist = []
@@ -325,9 +336,9 @@ if ("hit_df" in st.session_state):
                                     placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation whose source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
                                     precision_checklist = []
                                     for j in range(num_citations_in_sentence):
-                                        precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
+                                        precision_checklist.append(placeholders_prec[i][j].checkbox('['+str(citations[j])+']', key='cb_sentence'+str(i)+'_citation'+str(j)))
                                     pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
-                                eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time)
+                                eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time, col2_container, sources_placeholder)
                             else:
                                 st.session_state['prec_results'] = prec_results
                                 st.session_state['cov_results'] = cov_results
@@ -340,23 +351,82 @@ if ("hit_df" in st.session_state):
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
                 subheader_container.subheader("Sentence "+str(i+1)+"/"+str(len(sentences)))
                 highlighted_sentence = highlight(sentence)
-                full_response_container.markdown('''**Cited System Response:**\n\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
+                sentence = clear_ansi(sentence)
+                full_response_container.markdown("<p>Cited System Response:\n\n"+clear_ansi(cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")+"</p>", unsafe_allow_html=True)
+                # full_response_container.markdown('''**Cited System Response:**\n\n'''+highlight(cited_response).replace(highlighted_sentence.strip(), '''***'''+highlighted_sentence.strip()+'''***'''))
                 # sentence_container.markdown('''**Sentence to evaluate:**\n'''+highlighted_sentence)
                 cited_sources_ls = eval(cited_sources)
-                for j in range(len(cited_sources_ls)):
-                    curr_source = cited_sources_ls[j]
-                    curr_source_ls = curr_source.split('\n')
-                    curr_url = curr_source_ls[0]
-                    curr_source = ' '.join(curr_source_ls[1:])
-                    curr_source = '**Source '+NUM_TO_ALPHA[j]+': '+curr_url+'**\n\n'+curr_source
-                    cited_sources_ls[j] = curr_source
-                highlighted_cited_sources = [highlight(cited_sources_ls[j]) for j in range(len(cited_sources_ls))]
-                with col2.container(height=700):
-                    sources_container = st.empty()
-                    sources_container.markdown("\n_____________________________________________________________\n".join(highlighted_cited_sources))
+
+                def get_substring_indices(text, substring):
+                    i = 0
+                    ocurrences = []
+                    for i in range(len(text)-len(substring)):
+                        if (substring == text[i:i+len(substring)]):
+                            ocurrences.append((i,i+len(substring)))
+                    return ocurrences
+
+                def get_cited_sources_for_sentence(cited_sources_ls, citations):
+                    sources_idxs_to_show = {}
+                    for citation_num in citations:
+                        citation = '['+str(citation_num)+']'
+                        highlighted_citation = "<span class='orange-highlight'>"+citation
+                        found_citation = False
+                        for ansi_escape_sequence in COLORS.keys():
+                            if (found_citation):
+                                break
+                            ansi_citation = ansi_escape_sequence+citation
+
+                            for j in range(len(cited_sources_ls)):
+                                source = cited_sources_ls[j]
+                                if (ansi_citation in source):
+                                    found_citation = True
+                                    start_citation_occurrences = get_substring_indices(source, ansi_citation)
+                                    source_to_use = source[:start_citation_occurrences[0][0]]+highlighted_citation+source[start_citation_occurrences[0][1]:]
+                                    end_citation_occurrences = get_substring_indices(source_to_use, '\x1b[0m')
+                                    slice_to_use = None
+                                    for slice in end_citation_occurrences:
+                                        if (slice[0] > start_citation_occurrences[0][0]):
+                                            slice_to_use = slice
+                                            break
+                                    source_to_use = source_to_use[:slice_to_use[0]]+"</span>"+source_to_use[slice_to_use[1]:]
+                                    cited_sources_ls[j] = source_to_use
+                                    if (j not in sources_idxs_to_show.keys()):
+                                        sources_idxs_to_show[j] = None
+                                    break
+
+                    sources_to_show = []
+                    for source_idx in sources_idxs_to_show.keys(): 
+                        curr_source = clear_ansi(cited_sources_ls[source_idx])
+                        curr_source_ls = curr_source.split('\n')
+                        curr_url = curr_source_ls[0][8:]
+                        if (curr_url[:4] == 'www.'):
+                            curr_url = curr_url[4:]
+                        curr_source = ' '.join(curr_source_ls[1:])
+                        sources_to_show.append('<b>Source: </b>'+curr_url+'\n\n'+curr_source)
+                    return sources_to_show
+                        
+                # for j in range(len(cited_sources_ls)):
+                #     curr_source = cited_sources_ls[j]
+                #     curr_source_ls = curr_source.split('\n')
+                #     curr_url = curr_source_ls[0]
+                #     curr_source = ' '.join(curr_source_ls[1:])
+                #     curr_source = '**Source '+NUM_TO_ALPHA[j]+': '+curr_url+'**\n\n'+curr_source
+                #     cited_sources_ls[j] = curr_source
+                # highlighted_cited_sources = [highlight(cited_sources_ls[j]) for j in range(len(cited_sources_ls))]
+                
                 citations_dict = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Citation Dict'])
                 citations = citations_dict[str(i)]['citation_numbers']
                 num_citations_in_sentence = len(citations)
+
+                highlighted_cited_sources = get_cited_sources_for_sentence(cited_sources_ls, citations)
+                
+                # with col2:
+                #     placeholders_sources[i].write("\n_____________________________________________________________\n".join(highlighted_cited_sources), unsafe_allow_html=True)
+                col2_container = col2.container(height=600)
+                with col2_container:
+                    sources_placeholder = st.empty()
+                    sources_placeholder.write("\n_____________________________________________________________\n".join(highlighted_cited_sources), unsafe_allow_html=True)
+
                 if (num_citations_in_sentence==0):
                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                     if ('prec_t2v' not in st.session_state):
@@ -370,12 +440,12 @@ if ("hit_df" in st.session_state):
                     placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation whose source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
                     precision_checklist = []
                     for j in range(num_citations_in_sentence):
-                        precision_checklist.append(placeholders_prec[i][j].checkbox(str(citations[j]), key='cb_sentence'+str(i)+'_citation'+str(j)))
+                        precision_checklist.append(placeholders_prec[i][j].checkbox('['+str(citations[j])+']', key='cb_sentence'+str(i)+'_citation'+str(j)))
                     if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
                         st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                 pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
 
-                eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time)
+                eval_next_sentence(pressed, precision_checklist, requires_attrib, citations_dict, i, save_time, col2_container, sources_placeholder)
                     
 
 
