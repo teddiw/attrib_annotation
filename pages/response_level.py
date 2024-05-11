@@ -309,79 +309,69 @@ if ("hit_df" in st.session_state):
                     
                     return
 
-                def eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time, col2_container, sources_placeholder):
+                def eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder):
                      # clear any previous coverage question container
                     if (i > 0):
-                        placeholders_cov[i-1].empty()
-                    
-                    # Set state variable for precision submission button press
-                    if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
-                        st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
-
-                    # if the precision submission button is pressed, then proceed
-                    if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):# (prec_result!=-1):
-                        
-                        if (pressed):
-                            # if pressed for the first time (not on a internal page re-run), record the time
-                            save_time(i,'prec')
-                        
-                        # Set precision submission button variables and remove the button
-                        pressed = False
-                        st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
-                        placeholders_prec_button[i].empty()
-
-                        # Record the precision results and remove the precision text and checklist
-                        prec_results.append({"sentence_id": i, "annotations": precision_checklist})
                         placeholders_prec_text[i].empty()
                         for j in range(0, len(placeholders_prec[i])):
                             placeholders_prec[i][j].empty()
+                    
+                    # Set state variable for coverage submission button press
+                    if ('cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
+                        st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
 
-                        # Now, prepare to ask about coverage.
+                    # if the coverage submission button is pressed, then proceed
+                    if ((cov_pressed and cov_result) or st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):
                         
-                        # First, get citations
-                        citations = citations_dict[str(i)]['citation_numbers']
-                        num_citations_in_sentence = len(citations)
+                        if (cov_pressed):
+                            # if pressed for the first time (not on a internal page re-run), record the time
+                            save_time(i,'cov') # TODO change what's needed in this fn to swap
+                        
+                        # Set coverage submission button variables and remove the button
+                        cov_pressed = False
+                        st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
+                        placeholders_cov_button[i].empty()
 
-                        if (num_citations_in_sentence == 0):
-                            # TODO may expand this case to allow for "yes" if no citation is needed? or just keep as None.
-                            cov_result = "No"
-                        else:
-                            # build the string citation list
-                            citations_str = ''
-                            for k in range(len(citations)):
-                                citation_num = citations[k]
-                                if (len(citations)==1):
-                                    citations_str += '['+str(citation_num)+']'
-                                    break
-                                if (k == len(citations)-1):
-                                    citations_str += 'and ['+str(citation_num)+']'
-                                elif (len(citations)==2):
-                                    citations_str += '['+str(citation_num)+'] '
-                                else:
-                                    citations_str += '['+str(citation_num)+'], '
-                            if (num_citations_in_sentence == 1):
-                                coverage_text = '*2. Does the source of '+citations_str+' support **all** information in the sentence?*'
-                            else:
-                                coverage_text = '*2. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
-                            # Show the coverage question and multiple choice
-                            cov_result = placeholders_cov[i].radio(
-                                        label=coverage_text,
-                                        options=["Yes", "No"],
-                                        index=None,
-                                        key=str(i)+'coverage',
-                                        on_change=save_time,
-                                        args=(i,'cov',))
-                        
-                        # Once we get the coverage result...
-                        if (cov_result):
-                            # Stash the coverage result
-                            if cov_result == "Yes":
+                        # Record the coverage results and remove the coverage text and checklist
+                        if cov_result == "Yes":
                                 cov_results[i] = 1
-                            else:
-                                cov_results[i] = 0
-                            
-                            cov_result = None
+                        else:
+                            cov_results[i] = 0
+                        
+                        cov_result = None
+                        placeholders_cov[i].empty()
+                        placeholders_cov_button[i].empty()
 
+                        # Now, prepare to ask about precision.
+                        # Display precision prompt and checklist
+                        placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation whose source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
+                        precision_checklist = []
+                        citations = citations_dict[str(i)]['citation_numbers']
+                        for j in range(len(citations)):
+                            precision_checklist.append(placeholders_prec[i][j].checkbox('['+str(citations[j])+']', key='cb_sentence'+str(i)+'_citation'+str(j)))
+                        # Set state variable for precision submission button press
+                        if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
+                            st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
+                    
+                        # Display precision submission button
+                        pressed = placeholders_prec_button[i].button('Continue task from prec', key='continue_press_button_sentence'+str(i))
+                    
+                        # Once we get the precision result...
+                        if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):
+                            # save T2V
+                            if (pressed):
+                                save_time(i,'prec')
+                            
+                            # remove prec button
+                            placeholders_prec_button[i].empty()
+                            st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
+                            
+                            # Stash the precision result
+                            prec_results.append({"sentence_id": i, "annotations": precision_checklist})
+                            placeholders_prec_text[i].empty()
+                            for j in range(0, len(placeholders_prec[i])):
+                                placeholders_prec[i][j].empty()
+                            
                             i += 1
                             # On to the next sentence, if there is one
                             if (i < num_sentences):
@@ -404,19 +394,42 @@ if ("hit_df" in st.session_state):
 
                                 if (len(citations)==0):
                                     # If there are no citations in the first sentence, set up variables for the next sentence
+                                    st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                                     st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
-                                    precision_checklist = []
+
                                 else:
-                                    # Display precision prompt and checklist
-                                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation whose source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
-                                    precision_checklist = []
-                                    for j in range(len(citations)):
-                                        precision_checklist.append(placeholders_prec[i][j].checkbox('['+str(citations[j])+']', key='cb_sentence'+str(i)+'_citation'+str(j)))
-                                    # Display precision submission button
-                                    pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
+                                    if (num_citations_in_sentence == 0):
+                                        # TODO may expand this case to allow for "yes" if no citation is needed? or just keep as None.
+                                        cov_result = "No"
+                                    else:
+                                        # build the string citation list
+                                        citations_str = ''
+                                        for k in range(len(citations)):
+                                            citation_num = citations[k]
+                                            if (len(citations)==1):
+                                                citations_str += '['+str(citation_num)+']'
+                                                break
+                                            if (k == len(citations)-1):
+                                                citations_str += 'and ['+str(citation_num)+']'
+                                            elif (len(citations)==2):
+                                                citations_str += '['+str(citation_num)+'] '
+                                            else:
+                                                citations_str += '['+str(citation_num)+'], '
+                                        if (num_citations_in_sentence == 1):
+                                            coverage_text = '*2. Does the source of '+citations_str+' support **all** information in the sentence?*'
+                                        else:
+                                            coverage_text = '*2. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
+                                        # Show the coverage question and multiple choice
+                                        cov_result = placeholders_cov[i].radio(
+                                                    label=coverage_text,
+                                                    options=["Yes", "No"],
+                                                    index=None,
+                                                    key=str(i)+'coverage',
+                                                    args=(i,'cov',))
+                                        cov_pressed = placeholders_cov_button[i].button('Continue task', key='cov_continue_press_button_sentence'+str(i))
 
                                 # Next call to eval
-                                eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time, col2_container, sources_placeholder)
+                                eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder)
                             else:
                                 # If no next sentence, save everything to the database
                                 st.session_state['prec_results'] = prec_results
@@ -450,27 +463,50 @@ if ("hit_df" in st.session_state):
                 
                 if (len(citations)==0):
                     # If there are no citations in the first sentence, set up variables for the next sentence
-                    st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
+                    st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = True
                     if ('prec_t2v' not in st.session_state):
                         st.session_state['prec_t2v'] = []
                     if ('cov_t2v' not in st.session_state):
                         st.session_state['cov_t2v'] = []
-                    precision_checklist = []
                 else:
-                    # Display precision prompt and checklist
-                    placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation whose source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
-                    precision_checklist = []
-                    for j in range(len(citations)):
-                        precision_checklist.append(placeholders_prec[i][j].checkbox('['+str(citations[j])+']', key='cb_sentence'+str(i)+'_citation'+str(j)))
-                    # Set state variable for precision submission button press
-                    if ('continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"]) not in st.session_state):
-                        st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                 
-                # Display precision submission button
-                pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
+                    # First, get citations
+                    citations = citations_dict[str(i)]['citation_numbers']
+                    num_citations_in_sentence = len(citations)
 
+                    if (num_citations_in_sentence == 0):
+                        # TODO may expand this case to allow for "yes" if no citation is needed? or just keep as None.
+                        cov_result = "No"
+                    else:
+                        # build the string citation list
+                        citations_str = ''
+                        for k in range(len(citations)):
+                            citation_num = citations[k]
+                            if (len(citations)==1):
+                                citations_str += '['+str(citation_num)+']'
+                                break
+                            if (k == len(citations)-1):
+                                citations_str += 'and ['+str(citation_num)+']'
+                            elif (len(citations)==2):
+                                citations_str += '['+str(citation_num)+'] '
+                            else:
+                                citations_str += '['+str(citation_num)+'], '
+                        if (num_citations_in_sentence == 1):
+                            coverage_text = '*2. Does the source of '+citations_str+' support **all** information in the sentence?*'
+                        else:
+                            coverage_text = '*2. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
+                        # Show the coverage question and multiple choice
+                        cov_result = placeholders_cov[i].radio(
+                                    label=coverage_text,
+                                    options=["Yes", "No"],
+                                    index=None,
+                                    key=str(i)+'coverage',
+                                    args=(i,'cov',))
+                        cov_pressed = placeholders_cov_button[i].button('Continue task', key='cov_continue_press_button_sentence'+str(i))
+                        
+                    
                 # Proceed to coverage & then the next sentence
-                eval_next_sentence(pressed, precision_checklist, citations_dict, i, save_time, col2_container, sources_placeholder)
+                eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder)
                     
 
 
