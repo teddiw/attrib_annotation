@@ -52,21 +52,16 @@ def save_time(i, task_str):
     seconds_elapsed = time.time() - st.session_state["start_time"]
     if (task_str == 'prec'):
         if ('prec_t2v' in st.session_state):
-            t2v_so_far = st.session_state['prec_t2v']
-            t2v_so_far.append(seconds_elapsed)
-            st.session_state['prec_t2v'] = t2v_so_far
+            st.session_state['prec_t2v'].append(seconds_elapsed)
         else:
             st.session_state['prec_t2v'] = [seconds_elapsed]
+        st.session_state["start_time"] = time.time()
     else:
         if ('cov_t2v' in st.session_state):
-            t2v_so_far = st.session_state['cov_t2v']
-            t2v_so_far.append(seconds_elapsed)
-            st.session_state['cov_t2v'] = t2v_so_far
+            st.session_state['cov_t2v'].append(seconds_elapsed)
         else:
-            t2v_so_far = [seconds_elapsed]
-            st.session_state['cov_t2v'] = t2v_so_far
+            st.session_state['cov_t2v'] = [seconds_elapsed]
         st.session_state["start_time"] = time.time()
-        # st.session_state["started_timer"] = True
     return
 
 def get_substring_indices(text, substring):
@@ -253,7 +248,7 @@ if ("hit_df" in st.session_state):
                 sentences = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Sent (cited)'])
                 num_sentences = len(sentences)
                 prec_results = []
-                cov_results = [-1]*num_sentences
+                cov_results = []
                 placeholders_prec = {}
                 placeholders_prec_text = []
                 placeholders_cov = []
@@ -334,9 +329,9 @@ if ("hit_df" in st.session_state):
 
                         # Record the coverage results and remove the coverage text and checklist
                         if cov_result == "Yes":
-                                cov_results[i] = 1
+                            cov_results.append({"sentence_id": i, "coverage": 1})
                         else:
-                            cov_results[i] = 0
+                            cov_results.append({"sentence_id": i, "coverage": 0})
                         
                         cov_result = None
                         placeholders_cov[i].empty()
@@ -344,7 +339,7 @@ if ("hit_df" in st.session_state):
 
                         # Now, prepare to ask about precision.
                         # Display precision prompt and checklist
-                        placeholders_prec_text[i].markdown('<p class="big-font">1. Please select each citation whose source (on the right) supports information in the italicized sentence above.</p>', unsafe_allow_html=True)
+                        placeholders_prec_text[i].markdown('<p class="big-font">2. Please select each citation below whose source supports information in the highlighted sentence above.</p>', unsafe_allow_html=True)
                         precision_checklist = []
                         citations = citations_dict[str(i)]['citation_numbers']
                         for j in range(len(citations)):
@@ -354,7 +349,7 @@ if ("hit_df" in st.session_state):
                             st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])] = False
                     
                         # Display precision submission button
-                        pressed = placeholders_prec_button[i].button('Continue task from prec', key='continue_press_button_sentence'+str(i))
+                        pressed = placeholders_prec_button[i].button('Continue task', key='continue_press_button_sentence'+str(i))
                     
                         # Once we get the precision result...
                         if (pressed or st.session_state['continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):
@@ -416,9 +411,9 @@ if ("hit_df" in st.session_state):
                                             else:
                                                 citations_str += '['+str(citation_num)+'], '
                                         if (num_citations_in_sentence == 1):
-                                            coverage_text = '*2. Does the source of '+citations_str+' support **all** information in the sentence?*'
+                                            coverage_text = '*1. Does the source of '+citations_str+' support **all** information in the sentence?*'
                                         else:
-                                            coverage_text = '*2. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
+                                            coverage_text = '*1. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
                                         # Show the coverage question and multiple choice
                                         cov_result = placeholders_cov[i].radio(
                                                     label=coverage_text,
@@ -492,9 +487,9 @@ if ("hit_df" in st.session_state):
                             else:
                                 citations_str += '['+str(citation_num)+'], '
                         if (num_citations_in_sentence == 1):
-                            coverage_text = '*2. Does the source of '+citations_str+' support **all** information in the sentence?*'
+                            coverage_text = '*1. Does the source of '+citations_str+' support **all** information in the sentence?*'
                         else:
-                            coverage_text = '*2. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
+                            coverage_text = '*1. Do the sources of '+citations_str+' together support **all** information in the sentence?*'
                         # Show the coverage question and multiple choice
                         cov_result = placeholders_cov[i].radio(
                                     label=coverage_text,
