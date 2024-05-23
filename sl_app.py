@@ -45,7 +45,19 @@ if (st.session_state["username"]):
 
     # Connect to google sheets
     if ("Practice" in st.session_state["username"]):
-        conn = st.connection("gsheets_practice", type=GSheetsConnection)
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        # conn = st.connection("gsheets_practice", type=GSheetsConnection)
+        # conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+        st.session_state['annotations_db'] = 'annotations_practice'
+        instances_to_annotate = 'instances_to_annotate_practice'
+        df = conn.read()
+    elif ("Teddi Eli5" == st.session_state["username"]):
+        conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+        st.session_state['annotations_db'] = 'annotations_teddi_eli5'
+        instances_to_annotate = 'instances_to_annotate_teddi_eli5'
+        df = conn.read()
+    elif ("Teddi Eli5 Debug" == st.session_state["username"]):
+        conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
         df = conn.read()
@@ -82,6 +94,33 @@ if (st.session_state["username"]):
         hit_df = df.iloc[:5]
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         st.session_state["hit_ops"] = hit_df['op'].tolist()
+        
+        # st.session_state["hit_response_ids"] = [
+        #                                         # 76,
+        #                                         # 77,
+        #                                         # 78,
+        #                                         # 79,
+        #                                         # 80,
+        #                                     ]
+        # st.session_state["hit_ops"] = [# "Abstractive",
+        # #                                 "Entailed",
+        # #                                 "Abstractive",
+        # #                                 "Paraphrased",
+        # #                                 "Paraphrased",
+        #                             ]
+        # hit_df_rows = []
+        # for i in range(len(st.session_state["hit_response_ids"])):
+        #     curr_response_id = st.session_state["hit_response_ids"][i]
+        #     curr_hit_op = st.session_state["hit_ops"][i]
+        #     curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
+        #     hit_df_rows.append(curr_row)
+        # hit_df = pd.concat(hit_df_rows, ignore_index=True)
+        # st.session_state["total_tasks"] = len(st.session_state["hit_response_ids"])
+
+    elif ("Teddi Eli5 Debug" == st.session_state["username"]):
+        st.session_state["hit_response_ids"] = [47]
+        st.session_state["hit_ops"] = ['Quoted']
+        hit_df = df[(df['ID']==47)&(df['op']=='Quoted')]
     else:
         # identify the instances for this hit
         st.session_state["hit_response_ids"] = hit_response_ids_df['query_id'].tolist()
@@ -92,12 +131,13 @@ if (st.session_state["username"]):
             hit_op_ls.append(sampled_op)
             response_id = hit_response_ids_df.iloc[i]['query_id']
             # remove op from instances_to_annotate
-            if (len(remaining_ops) == 1):
-                # remove row from instances_to_annotate
-                db_conn.table(instances_to_annotate).delete().eq('query_id', response_id).execute()
-            else:
-                remaining_ops.remove(sampled_op) 
-                db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', response_id).execute()
+            if ("Practice" not in st.session_state["username"]):
+                if (len(remaining_ops) == 1):
+                    # remove row from instances_to_annotate
+                    db_conn.table(instances_to_annotate).delete().eq('query_id', response_id).execute()
+                else:
+                    remaining_ops.remove(sampled_op) 
+                    db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', response_id).execute()
         st.session_state["hit_ops"] = hit_op_ls
 
         # form the dataframe of instance info for this hit
