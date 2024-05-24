@@ -6,6 +6,7 @@ from streamlit_gsheets import GSheetsConnection
 from st_supabase_connection import SupabaseConnection
 from supabase import create_client, Client
 import random
+import collections
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 st.set_page_config(initial_sidebar_state="collapsed",
@@ -57,6 +58,11 @@ if (st.session_state["username"]):
         instances_to_annotate = 'instances_to_annotate_teddi_eli5'
         df = conn.read()
     elif ("Teddi Eli5 Debug" == st.session_state["username"]):
+        conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+        st.session_state['annotations_db'] = 'annotations_practice'
+        instances_to_annotate = 'instances_to_annotate_practice'
+        df = conn.read()
+    elif ("Teddi MH Debug" == st.session_state["username"]):
         conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
@@ -121,6 +127,47 @@ if (st.session_state["username"]):
         st.session_state["hit_response_ids"] = [47]
         st.session_state["hit_ops"] = ['Quoted']
         hit_df = df[(df['ID']==47)&(df['op']=='Quoted')]
+    elif (st.session_state["username"] == "Teddi MH Debug"):
+        # st.session_state["total_tasks"]
+        # viable_response_ids
+        i = 0
+        n_hit = 0
+        hit_op_ls = []
+        hit_id_ls = []
+        tt = viable_response_ids['query_id'].tolist()
+        while ((i < len(viable_response_ids)) & (n_hit < st.session_state["total_tasks"])):
+            instance = viable_response_ids.iloc[i]
+            remaining_ops = instance['ops']
+            remaining_ops_shuffled_copy = random.sample(remaining_ops.copy(), len(remaining_ops))
+            for op in remaining_ops_shuffled_copy:
+                # if this op is not yet in the hit, add it
+                if (op not in hit_op_ls):
+                    hit_op_ls.append(op)
+                    query_id = int(instance['query_id'])
+                    hit_id_ls.append(query_id)
+                    n_hit += 1
+                    # remove op from instances_to_annotate
+                    if (len(remaining_ops) == 1):
+                        # remove row from instances_to_annotate
+                        db_conn.table(instances_to_annotate).delete().eq('query_id', query_id).execute()
+                    else:
+                        remaining_ops.remove(op) 
+                        db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', query_id).execute()
+                    break
+            i+=1
+        # check hit_id_ls
+        st.session_state["hit_ops"] = hit_op_ls
+        st.session_state["hit_response_ids"] = hit_id_ls
+
+        # form the dataframe of instance info for this hit
+        rows_to_annotate = []
+        for query_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
+            rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
+        if (len(rows_to_annotate)==0):
+            st.switch_page('pages/no_more.py')
+    
+        hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
+
     else:
         # identify the instances for this hit
         st.session_state["hit_response_ids"] = hit_response_ids_df['query_id'].tolist()
@@ -148,11 +195,9 @@ if (st.session_state["username"]):
             st.switch_page('pages/no_more.py')
     
         hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
-
-    promised_query_ids.append(st.session_state["hit_response_ids"])
-    promised_ops.append(st.session_state["hit_ops"])
+    promised_query_ids.append(st.session_state["hit_response_ids"]+[-1]*(5-len(st.session_state["hit_response_ids"])))
+    promised_ops.append(st.session_state["hit_ops"]+["Null"]*(5-len(st.session_state["hit_response_ids"])))
     db_conn.table('annotators').update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
-    
     st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0
