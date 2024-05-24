@@ -127,17 +127,17 @@ if (st.session_state["username"]):
         st.session_state["hit_response_ids"] = [47]
         st.session_state["hit_ops"] = ['Quoted']
         hit_df = df[(df['ID']==47)&(df['op']=='Quoted')]
-    elif (st.session_state["username"] == "Teddi MH Debug"):
-        # st.session_state["total_tasks"]
-        # viable_response_ids
+    else:
         i = 0
         n_hit = 0
         hit_op_ls = []
         hit_id_ls = []
         tt = viable_response_ids['query_id'].tolist()
+        # continue until there are no more responses to annotate or all OPs are collected 
         while ((i < len(viable_response_ids)) & (n_hit < st.session_state["total_tasks"])):
             instance = viable_response_ids.iloc[i]
             remaining_ops = instance['ops']
+            # shuffle to avoid undesired ordering patterns
             remaining_ops_shuffled_copy = random.sample(remaining_ops.copy(), len(remaining_ops))
             for op in remaining_ops_shuffled_copy:
                 # if this op is not yet in the hit, add it
@@ -155,7 +155,6 @@ if (st.session_state["username"]):
                         db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', query_id).execute()
                     break
             i+=1
-        # check hit_id_ls
         st.session_state["hit_ops"] = hit_op_ls
         st.session_state["hit_response_ids"] = hit_id_ls
 
@@ -168,33 +167,6 @@ if (st.session_state["username"]):
     
         hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
 
-    else:
-        # identify the instances for this hit
-        st.session_state["hit_response_ids"] = hit_response_ids_df['query_id'].tolist()
-        hit_op_ls = []
-        for i in range(len(hit_response_ids_df)):
-            remaining_ops = hit_response_ids_df.iloc[i]['ops']
-            sampled_op = random.sample(remaining_ops, 1)[0]
-            hit_op_ls.append(sampled_op)
-            response_id = hit_response_ids_df.iloc[i]['query_id']
-            # remove op from instances_to_annotate
-            if ("Practice" not in st.session_state["username"]):
-                if (len(remaining_ops) == 1):
-                    # remove row from instances_to_annotate
-                    db_conn.table(instances_to_annotate).delete().eq('query_id', response_id).execute()
-                else:
-                    remaining_ops.remove(sampled_op) 
-                    db_conn.table(instances_to_annotate).update({'ops': remaining_ops}).eq('query_id', response_id).execute()
-        st.session_state["hit_ops"] = hit_op_ls
-
-        # form the dataframe of instance info for this hit
-        rows_to_annotate = []
-        for query_id, op in zip(st.session_state["hit_response_ids"], st.session_state["hit_ops"]):
-            rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
-        if (len(rows_to_annotate)==0):
-            st.switch_page('pages/no_more.py')
-    
-        hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
     promised_query_ids.append(st.session_state["hit_response_ids"]+[-1]*(5-len(st.session_state["hit_response_ids"])))
     promised_ops.append(st.session_state["hit_ops"]+["Null"]*(5-len(st.session_state["hit_response_ids"])))
     db_conn.table('annotators').update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
