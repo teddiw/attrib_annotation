@@ -41,7 +41,7 @@ st.session_state["username"] = st.text_input(
         key="get_username",
         max_chars=20,
     )
-
+st.session_state["hit_specific_id"] = st.query_params['hit_specific_id']
 if (st.session_state["username"]):
 
     # Connect to google sheets

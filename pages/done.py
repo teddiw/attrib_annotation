@@ -15,11 +15,7 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-
-completion_code = st.session_state["db_conn"].table("hit_completion_codes").select("completion_code").eq("hit_specific_id", st.query_params['hit_specific_id'])
-breakpoint()
-completion_code = completion_code.execute().data[0]['completion_code']
-breakpoint()
+completion_code = st.session_state["db_conn"].table("hit_completion_codes").select("completion_code").eq("hit_specific_id", st.session_state["hit_specific_id"]).execute().data[0]['completion_code']
 
 st.markdown('''# Done! Thank you so much! :raised_hands:''')
 st.markdown('''Please enter the completion code below on the MTurk HIT webpage for compensation.''')
