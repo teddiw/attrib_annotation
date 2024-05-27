@@ -97,7 +97,7 @@ if (st.session_state["username"]):
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     
     if ("Practice" in st.session_state["username"]):
-        hit_df = df.iloc[:5]
+        hit_df = df.iloc[:1]
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         st.session_state["hit_ops"] = hit_df['op'].tolist()
         
