@@ -275,6 +275,7 @@ if ("hit_df" in st.session_state):
                         st.session_state['ANSI_TO_MD_IDX'] = {}
                         st.switch_page('pages/response_level.py')
                     else:
+                        st.session_state["hit_finished"] = True
                         st.switch_page('pages/done.py')
                     
                 
@@ -333,6 +334,7 @@ if ("hit_df" in st.session_state):
                         st.session_state['ANSI_TO_MD_IDX'] = {}
                         st.switch_page('pages/response_level.py')
                     else:
+                        st.session_state["hit_finished"] = True
                         st.switch_page('pages/done.py')
                     
                     return
