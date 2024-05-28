@@ -98,36 +98,38 @@ if (st.session_state["username"]):
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     
     if ("Practice" in st.session_state["username"]):
-        hit_df = df.iloc[:1]
-        st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
-        st.session_state["hit_ops"] = hit_df['op'].tolist()
+        # hit_df = df.iloc[:5]
+        # st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
+        # st.session_state["hit_ops"] = hit_df['op'].tolist()
         
-        # st.session_state["hit_response_ids"] = [
-        #                                         # 76,
-        #                                         # 77,
-        #                                         # 78,
-        #                                         # 79,
-        #                                         # 80,
-        #                                     ]
-        # st.session_state["hit_ops"] = [# "Abstractive",
-        # #                                 "Entailed",
-        # #                                 "Abstractive",
-        # #                                 "Paraphrased",
-        # #                                 "Paraphrased",
-        #                             ]
-        # hit_df_rows = []
-        # for i in range(len(st.session_state["hit_response_ids"])):
-        #     curr_response_id = st.session_state["hit_response_ids"][i]
-        #     curr_hit_op = st.session_state["hit_ops"][i]
-        #     curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
-        #     hit_df_rows.append(curr_row)
-        # hit_df = pd.concat(hit_df_rows, ignore_index=True)
-        # st.session_state["total_tasks"] = len(st.session_state["hit_response_ids"])
+        st.session_state["hit_response_ids"] = [
+                                                54,
+                                                52,
+                                                55,
+                                                30,
+                                                30,
+                                            ]
+        st.session_state["hit_ops"] = [
+                                        "Paraphrased",
+                                        "Entailed",
+                                        "Paraphrased",
+                                        "Abstractive",
+                                        "Paraphrased",
+                                        
+                                    ]
+        hit_df_rows = []
+        for i in range(len(st.session_state["hit_response_ids"])):
+            curr_response_id = st.session_state["hit_response_ids"][i]
+            curr_hit_op = st.session_state["hit_ops"][i]
+            curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
+            hit_df_rows.append(curr_row)
+        hit_df = pd.concat(hit_df_rows, ignore_index=True)
+        st.session_state["total_tasks"] = len(st.session_state["hit_response_ids"])
 
     elif ("Teddi Eli5 Debug" == st.session_state["username"]):
-        st.session_state["hit_response_ids"] = [47]
-        st.session_state["hit_ops"] = ['Quoted']
-        hit_df = df[(df['ID']==47)&(df['op']=='Quoted')]
+        st.session_state["hit_response_ids"] = [45]
+        st.session_state["hit_ops"] = ['Entailed']
+        hit_df = df[(df['ID']==st.session_state["hit_response_ids"][0])&(df['op']==st.session_state["hit_ops"][0])]
     else:
         i = 0
         n_hit = 0

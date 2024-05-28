@@ -196,7 +196,7 @@ if ("hit_df" in st.session_state):
     #     utility_rubric_container.write(utility_rubric_df)
 
     with col1:
-        f_rubric_container = st.empty()
+        # f_rubric_container = st.empty()
         fluency_container = st.empty()
         unmarked_response = replace_dollar_signs(unmarked_response)
         full_response_container.write("<p><b>System Response:</b>\n\n"+unmarked_response+"</p>", unsafe_allow_html=True)
@@ -206,10 +206,12 @@ if ("hit_df" in st.session_state):
     # fluency_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
     # fluency_label = "*1. To what extent do you agree with the following:*\n\n **The response is fluent and coherent.**"
 
-    f_rubric_container.write(pd.DataFrame({'Fluency Rubric Number':[1,2,3], 'Description':['The response contains many typos or lacks crucial transitions between sentences.','The response contains some typos and mostly has smooth transitions between sentences.','The response has no typos and has smooth transitions.']}))
+    # f_rubric_container.write(pd.DataFrame({'Fluency Rubric Number':[1,2,3], 'Description':['The response contains many typos or lacks crucial transitions between sentences.','The response contains some typos and mostly has smooth transitions between sentences.','The response has no typos and has smooth transitions.']}))
 
-    fluency_options = ['1', '2', '3']
-    fluency_label = "Which fluency rubric number best describes the response to the query?"
+    fluency_options = ['1: Response has misprints or abrupt transitions between sentences', 
+                       '2: Response has no misprints and mostly smooth transitions between sentences', 
+                       '3: Response has no misprints and all of the sentences flow nicely together']
+    fluency_label = "To what extent is the response fluent and coherent?"
     fluency_rating = fluency_container.radio(
                                         label=fluency_label,
                                         options=fluency_options,
@@ -218,16 +220,18 @@ if ("hit_df" in st.session_state):
                                         )
     if (fluency_rating):
         with col1:
-            u_rubric_container = st.empty()
+            # u_rubric_container = st.empty()
             utility_container = st.empty()
             
         # utility_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
         # utility_label = "*2. To what extent do you agree with the following:*\n\n **If you assume the information is factual, the response is a useful answer to the query.**"
 
-        u_rubric_container.write(pd.DataFrame({'Utility Rubric Number':[1,2,3], 'Description':['The response does not answer the query or answers it in an unhelpful way.','The response partially answers the query in at least a mostly helpful way.','The response fully answers the query in a helpful way.']}))
+        # u_rubric_container.write(pd.DataFrame({'Utility Rubric Number':[1,2,3], 'Description':['The response does not answer the query or answers it in an unhelpful way.','The response partially answers the query in at least a mostly helpful way.','The response fully answers the query in a helpful way.']}))
         
-        utility_options = ['1', '2', '3']
-        utility_label = "Which utility rubric number best describes the response to the query?"
+        utility_options = ['1: Response is a frustrating length or the query is not addressed', 
+                           '2: Response is only a partially satisfying answer to the query', 
+                           '3: Response is a reasonable length and is a satisfying answer to the query']
+        utility_label = "To what extent is the response a useful answer to the query?"
         utility_rating = utility_container.radio(
                             label=utility_label,
                             options=utility_options,
@@ -248,8 +252,8 @@ if ("hit_df" in st.session_state):
                 fluency_container.empty()
                 utility_container.empty()
                 continue_container.empty()
-                u_rubric_container.empty()
-                f_rubric_container.empty()
+                # u_rubric_container.empty()
+                # f_rubric_container.empty()
                 op = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['op']
                 response_id = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['ID']
                 if (op == 'Snippet'):
