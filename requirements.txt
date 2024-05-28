@@ -4,3 +4,4 @@ pandas
 st-supabase-connection
 git+https://github.com/streamlit/gsheets-connection
 supabase
+boto3
