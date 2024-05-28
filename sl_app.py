@@ -43,39 +43,43 @@ st.session_state["username"] = st.text_input(
     )
 st.session_state["hit_specific_id"] = st.query_params['hit_specific_id']
 st.session_state["hit_finished"] = False
-if (st.session_state["username"]):
 
+if (st.session_state["username"]):
+    st.session_state['annotator_db_str'] = 'annotators'
     # Connect to google sheets
-    if ("Practice" in st.session_state["username"]):
+    if ("Trial" in st.session_state["username"]):
+        conn = st.connection("gsheets_trial", type=GSheetsConnection) # TODO updates
+        st.session_state['annotations_db'] = 'annotations_trial'
+        instances_to_annotate = 'instances_to_annotate_practice' # not used; removed
+        st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
+    elif ("Practice" in st.session_state["username"]):
         conn = st.connection("gsheets", type=GSheetsConnection)
         # conn = st.connection("gsheets_practice", type=GSheetsConnection)
         # conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
-        df = conn.read()
     elif ("Teddi Eli5" == st.session_state["username"]):
         conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_teddi_eli5'
         instances_to_annotate = 'instances_to_annotate_teddi_eli5'
-        df = conn.read()
     elif ("Teddi Eli5 Debug" == st.session_state["username"]):
         conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
-        df = conn.read()
     elif ("Teddi MH Debug" == st.session_state["username"]):
         conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
-        df = conn.read()
     else:
         conn = st.connection("gsheets", type=GSheetsConnection)
         instances_to_annotate = 'instances_to_annotate'
         st.session_state['annotations_db'] = 'annotations'
-        df = conn.read()
+    
+    # get data
+    df = conn.read()
 
     # get annotator's history
-    annotator_rows = db_conn.table("annotators").select("*").execute()
+    annotator_rows = db_conn.table(st.session_state['annotator_db_str']).select("*").execute()
     touched_response_ids = None
     promised_query_ids = []
     promised_ops = []
@@ -96,8 +100,13 @@ if (st.session_state["username"]):
     viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
     st.session_state["total_tasks"] = 5
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
-    
-    if ("Practice" in st.session_state["username"]):
+
+    if ("Trial" in st.session_state["username"]):
+        hit_df = df.iloc[:5] # TODO make five and randomize
+        st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
+        st.session_state["hit_ops"] = hit_df['op'].tolist()
+        
+    elif ("Practice" in st.session_state["username"]):
         # hit_df = df.iloc[:5]
         # st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         # st.session_state["hit_ops"] = hit_df['op'].tolist()
@@ -172,7 +181,7 @@ if (st.session_state["username"]):
 
     promised_query_ids.append(st.session_state["hit_response_ids"]+[-1]*(5-len(st.session_state["hit_response_ids"])))
     promised_ops.append(st.session_state["hit_ops"]+["Null"]*(5-len(st.session_state["hit_response_ids"])))
-    db_conn.table('annotators').update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
+    db_conn.table(st.session_state['annotator_db_str']).update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
     st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0

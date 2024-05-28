@@ -174,39 +174,11 @@ if ("hit_df" in st.session_state):
         unmarked_response = "\n\n".join(snippets_to_show)
     else:
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
-    
-    # with col2.container(height=700):
-    #     fluency_rubric_container = st.empty()
-    #     utility_rubric_container = st.empty()
-    #     fluency_rubric_df = pd.DataFrame({'Fluency Rating':[1,2,3,4,5], 
-    #                                       'Fluency Rubric':['Frequent typos or grammatical errors and often missing natural transitions between sentences',
-    #                                                         'Some typos or grammatical errors and sometimes missing natural transitions between sentences',
-    #                                                         'No typos, minor grammatical errors, and mostly has natural transitions between sentences',
-    #                                                         'No typos, no grammatical errors, and mostly has natural transitions between sentences',
-    #                                                         'No typos, no grammatical errors, and always has natural transitions between sentences']},
-    #                                                         index=None)
-    #     utility_rubric_df = pd.DataFrame({'Utility Rating':[1,2,3,4,5], 
-    #                                       'Utility Rubric':['The response does not answer the query or contains a lot of unnecessary content.',
-    #                                                         'The response appears to partially answer the query but contains some unnecessary content.',
-    #                                                         'The response appears to partially answer the query without unnecessary content.',
-    #                                                         'The response appears to fully answer the query with some unnecessary content.',
-    #                                                         'The response appears to fully answer the query without unnecessary content.',]},
-    #                                                         index=None)
-    #     fluency_rubric_container.write(fluency_rubric_df)
-    #     utility_rubric_container.write(utility_rubric_df)
 
     with col1:
-        # f_rubric_container = st.empty()
         fluency_container = st.empty()
         unmarked_response = replace_dollar_signs(unmarked_response)
         full_response_container.write("<p><b>System Response:</b>\n\n"+unmarked_response+"</p>", unsafe_allow_html=True)
-        # st.divider()
-        # sentence_container = st.empty()
-        
-    # fluency_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
-    # fluency_label = "*1. To what extent do you agree with the following:*\n\n **The response is fluent and coherent.**"
-
-    # f_rubric_container.write(pd.DataFrame({'Fluency Rubric Number':[1,2,3], 'Description':['The response contains many typos or lacks crucial transitions between sentences.','The response contains some typos and mostly has smooth transitions between sentences.','The response has no typos and has smooth transitions.']}))
 
     fluency_options = ['1: Response has misprints or abrupt transitions between sentences', 
                        '2: Response has no misprints and mostly smooth transitions between sentences', 
@@ -220,14 +192,8 @@ if ("hit_df" in st.session_state):
                                         )
     if (fluency_rating):
         with col1:
-            # u_rubric_container = st.empty()
             utility_container = st.empty()
             
-        # utility_options = ['1: Strongly disagree', '2: Disagree', '3: Neither agree nor disagree', '4: Agree', '5: Strongly agree']
-        # utility_label = "*2. To what extent do you agree with the following:*\n\n **If you assume the information is factual, the response is a useful answer to the query.**"
-
-        # u_rubric_container.write(pd.DataFrame({'Utility Rubric Number':[1,2,3], 'Description':['The response does not answer the query or answers it in an unhelpful way.','The response partially answers the query in at least a mostly helpful way.','The response fully answers the query in a helpful way.']}))
-        
         utility_options = ['1: Response is a frustrating length or the query is not addressed', 
                            '2: Response is only a partially satisfying answer to the query', 
                            '3: Response is a reasonable length and is a satisfying answer to the query']
@@ -252,8 +218,6 @@ if ("hit_df" in st.session_state):
                 fluency_container.empty()
                 utility_container.empty()
                 continue_container.empty()
-                # u_rubric_container.empty()
-                # f_rubric_container.empty()
                 op = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['op']
                 response_id = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['ID']
                 if (op == 'Snippet'):
@@ -266,7 +230,7 @@ if ("hit_df" in st.session_state):
                     "query_id":int(response_id),
                     }).execute()    
                     st.session_state['touched_response_ids'] += [int(response_id)]
-                    st.session_state.db_conn.table('annotators').update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
+                    st.session_state.db_conn.table(st.session_state['annotator_db_str']).update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
                     
                     # reset fluency/utility button press
                     st.session_state["b1_press"] = False
@@ -325,7 +289,7 @@ if ("hit_df" in st.session_state):
                     "query_id":int(response_id),
                     }).execute()  
                     st.session_state['touched_response_ids'] += [int(response_id)]
-                    st.session_state.db_conn.table('annotators').update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
+                    st.session_state.db_conn.table(st.session_state['annotator_db_str']).update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
                     
                     # reset button presses
                     st.session_state["b1_press"] = False
