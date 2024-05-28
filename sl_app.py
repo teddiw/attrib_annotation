@@ -48,9 +48,9 @@ if (st.session_state["username"]):
     st.session_state['annotator_db_str'] = 'annotators'
     # Connect to google sheets
     if ("Trial" in st.session_state["username"]):
-        conn = st.connection("gsheets_trial", type=GSheetsConnection) # TODO updates
+        conn = st.connection("gsheets_trial", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'annotations_trial'
-        instances_to_annotate = 'instances_to_annotate_practice' # not used; removed
+        instances_to_annotate = 'instances_to_annotate_mturk_trial' # not used
         st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
     elif ("Practice" in st.session_state["username"]):
         conn = st.connection("gsheets", type=GSheetsConnection)
@@ -102,7 +102,7 @@ if (st.session_state["username"]):
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
 
     if ("Trial" in st.session_state["username"]):
-        hit_df = df.iloc[:5] # TODO make five and randomize
+        hit_df = df.iloc[:5] # already randomized in the spreadsheet
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         st.session_state["hit_ops"] = hit_df['op'].tolist()
         
