@@ -36,14 +36,14 @@ if (is_mturk_user):
                         aws_access_key_id = st.secrets["aws_access_key_id"],
                         aws_secret_access_key = st.secrets["aws_secret_access_key"],
                         region_name='us-east-1',
-                        endpoint_url = MTURK_SANDBOX
+                        endpoint_url = MTURK
                         )
     # get new number of completed HITs for this group
     num_worker_annotations = len(st.session_state["db_conn"].table(st.session_state['annotations_db']).select("query_id").eq("annotator_id", st.session_state["username"]).execute().data)//5
     
     # update the worker's qualification
     if ('_Trial' in st.session_state["username"]):
-        NUM_TRIALS_QUAL_ID = '39DNHIB68BFFKDOSRKF3VZ9WE6V9EL' # <-- Liang sandbox # Liang real for trial '3U4RTBK6TD4L9P0FWBFSBYPO1GXU24' # Guestrin real '3LW1BECZ1OKIR84E7XGS2E027J5RS4' # Guestrin SB '3O42DSCJPU0X16ST9JDZLV1W82OX6J' 
+        NUM_TRIALS_QUAL_ID = '3U4RTBK6TD4L9P0FWBFSBYPO1GXU24' # <-- Liang real for trial # '39DNHIB68BFFKDOSRKF3VZ9WE6V9EL' <-- Liang sandbox # Guestrin real '3LW1BECZ1OKIR84E7XGS2E027J5RS4' # Guestrin SB '3O42DSCJPU0X16ST9JDZLV1W82OX6J' 
     elif ('_NQ' in st.session_state["username"]):
         NUM_TRIALS_QUAL_ID = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40' # <-- Liang real
     elif ('_ELI3' in st.session_state["username"]):
