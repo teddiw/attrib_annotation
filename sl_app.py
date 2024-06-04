@@ -47,27 +47,28 @@ st.session_state["hit_finished"] = False
 if (st.session_state["username"]):
     st.session_state['annotator_db_str'] = 'annotators'
     # Connect to google sheets
-    if ("_Trial" in st.session_state["username"]):
+    if ("_Trial" == st.session_state["username"][-6:]):
         conn = st.connection("gsheets_mturk_trial", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_trial_annotations' # 'annotations_trial'
         instances_to_annotate = 'mturk_trial_ita'# 'instances_to_annotate_mturk_trial' # not used
         st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
-    if ("_NQ" in st.session_state["username"]):
+        breakpoint()
+    elif ("_NQ" in st.session_state["username"][-3:]):
         conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_nq_annotations'
         instances_to_annotate = 'mturk_nq_ita' 
         st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    if ("_ELI3" in st.session_state["username"]):
+    elif ("_ELI3" in st.session_state["username"][-5:]):
         conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_eli3_annotations'
         instances_to_annotate = 'mturk_eli3_ita' 
         st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    if ("_MH" in st.session_state["username"]):
+    elif ("_MH" in st.session_state["username"][-3:]):
         conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_mh_annotations'
         instances_to_annotate = 'mturk_mh_ita' 
         st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    if ("_EMR" in st.session_state["username"]):
+    elif ("_EMR" in st.session_state["username"][-4:]):
         conn = st.connection("gsheets_mturk_emr", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_emr_annotations'
         instances_to_annotate = 'mturk_emr_ita' 
@@ -126,12 +127,10 @@ if (st.session_state["username"]):
     viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
     st.session_state["total_tasks"] = 5
     hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
-
-    if ("Trial" in st.session_state["username"]):
+    if ("_Trial" == st.session_state["username"][-6:]):
         hit_df = df.iloc[:5] # already randomized in the spreadsheet
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         st.session_state["hit_ops"] = hit_df['op'].tolist()
-        
     elif ("Practice" in st.session_state["username"]):
         hit_df = df.iloc[:5] # already randomized in the spreadsheet
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
@@ -232,6 +231,7 @@ if (st.session_state["username"]):
     st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0
+    breakpoint()
     st.switch_page('pages/response_level.py')
   
 
