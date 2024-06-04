@@ -114,11 +114,15 @@ def get_cited_sources_for_sentence(cited_sources_ls, citations):
     for source_idx in sources_idxs_to_show.keys(): 
         curr_source = clear_ansi(cited_sources_ls[source_idx])
         curr_source_ls = curr_source.split('\n')
-        curr_url = curr_source_ls[0][8:]
-        if (curr_url[:4] == 'www.'):
-            curr_url = curr_url[4:]
-        curr_source = ' '.join(curr_source_ls[1:])
-        sources_to_show.append(replace_dollar_signs('<b>Source: </b>'+curr_url+'\n\n'+curr_source))
+        if ('https://' in curr_source_ls[0]):
+            curr_source_ls = curr_source.split('\n')
+            curr_url = curr_source_ls[0][8:]
+            if (curr_url[:4] == 'www.'):
+                curr_url = curr_url[4:]
+            curr_source = ' '.join(curr_source_ls[1:])
+            sources_to_show.append(replace_dollar_signs('<b>Source: </b>'+curr_url+'\n\n'+curr_source))
+        else:
+            sources_to_show.append(replace_dollar_signs('<b>Source: </b>\n\n'+curr_source))
     return sources_to_show
 
 ## Page configs
@@ -180,10 +184,10 @@ if ("hit_df" in st.session_state):
         unmarked_response = replace_dollar_signs(unmarked_response)
         full_response_container.write("<p><b>System Response:</b>\n\n"+unmarked_response+"</p>", unsafe_allow_html=True)
 
-    fluency_options = ['1: Response has misprints or abrupt transitions between sentences', 
-                       '2: Response has no misprints and mostly smooth transitions between sentences', 
+    fluency_options = ['1: Response has misprints or disfluent transitions and sentences', 
+                       '2: Response has no misprints and mostly smooth transitions and sentences', 
                        '3: Response has no misprints and all of the sentences flow nicely together']
-    fluency_label = "To what extent is the response fluent and coherent?"
+    fluency_label = "**Fluency Question:** To what extent is the response fluent and coherent?"
     fluency_rating = fluency_container.radio(
                                         label=fluency_label,
                                         options=fluency_options,
@@ -194,10 +198,10 @@ if ("hit_df" in st.session_state):
         with col1:
             utility_container = st.empty()
             
-        utility_options = ['1: Response is a frustrating length or the query is not addressed', 
+        utility_options = ['1: Response includes too many irrelevant details or the query is not addressed', 
                            '2: Response is only a partially satisfying answer to the query', 
-                           '3: Response is a reasonable length and is a satisfying answer to the query']
-        utility_label = "To what extent is the response a useful answer to the query?"
+                           '3: The response is concise and seems to be a satisfying answer to the query']
+        utility_label = "**Utility Question:** To what extent does the response seem to be a useful answer to the query?"
         utility_rating = utility_container.radio(
                             label=utility_label,
                             options=utility_options,

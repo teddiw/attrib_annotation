@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-import sys
+# import sys
 import ssl
 from streamlit_gsheets import GSheetsConnection
-from st_supabase_connection import SupabaseConnection
+# from st_supabase_connection import SupabaseConnection
 from supabase import create_client, Client
 import random
-import collections
+# import collections
 
 ssl._create_default_https_context = ssl._create_stdlib_context
 st.set_page_config(initial_sidebar_state="collapsed",
@@ -47,13 +47,34 @@ st.session_state["hit_finished"] = False
 if (st.session_state["username"]):
     st.session_state['annotator_db_str'] = 'annotators'
     # Connect to google sheets
-    if ("Trial" in st.session_state["username"]):
-        conn = st.connection("gsheets_trial", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'annotations_trial'
-        instances_to_annotate = 'instances_to_annotate_mturk_trial' # not used
+    if ("_Trial" in st.session_state["username"]):
+        conn = st.connection("gsheets_mturk_trial", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_trial_annotations' # 'annotations_trial'
+        instances_to_annotate = 'mturk_trial_ita'# 'instances_to_annotate_mturk_trial' # not used
         st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
+    if ("_NQ" in st.session_state["username"]):
+        conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_nq_annotations'
+        instances_to_annotate = 'mturk_nq_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
+    if ("_ELI3" in st.session_state["username"]):
+        conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_eli3_annotations'
+        instances_to_annotate = 'mturk_eli3_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
+    if ("_MH" in st.session_state["username"]):
+        conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_mh_annotations'
+        instances_to_annotate = 'mturk_mh_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
+    if ("_EMR" in st.session_state["username"]):
+        conn = st.connection("gsheets_mturk_emr", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_emr_annotations'
+        instances_to_annotate = 'mturk_emr_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
     elif ("Practice" in st.session_state["username"]):
-        conn = st.connection("gsheets", type=GSheetsConnection)
+        conn = st.connection("gsheets_trial", type=GSheetsConnection) 
+        # conn = st.connection("gsheets", type=GSheetsConnection)
         # conn = st.connection("gsheets_practice", type=GSheetsConnection)
         # conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
@@ -66,8 +87,13 @@ if (st.session_state["username"]):
         conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
+    elif ("Teddi MH" == st.session_state["username"]):
+        conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
+        st.session_state['annotations_db'] = 'annotations_teddi_mh'
+        instances_to_annotate = 'instances_to_annotate_teddi_mh'
     elif ("Teddi MH Debug" == st.session_state["username"]):
-        conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+        # conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
+        conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection)
         st.session_state['annotations_db'] = 'annotations_practice'
         instances_to_annotate = 'instances_to_annotate_practice'
     else:
@@ -107,25 +133,41 @@ if (st.session_state["username"]):
         st.session_state["hit_ops"] = hit_df['op'].tolist()
         
     elif ("Practice" in st.session_state["username"]):
+        hit_df = df.iloc[:5] # already randomized in the spreadsheet
+        st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
+        st.session_state["hit_ops"] = hit_df['op'].tolist()
+        ###############
         # hit_df = df.iloc[:5]
         # st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         # st.session_state["hit_ops"] = hit_df['op'].tolist()
-        
-        st.session_state["hit_response_ids"] = [
-                                                54,
-                                                52,
-                                                55,
-                                                30,
-                                                30,
-                                            ]
-        st.session_state["hit_ops"] = [
-                                        "Paraphrased",
-                                        "Entailed",
-                                        "Paraphrased",
-                                        "Abstractive",
-                                        "Paraphrased",
+        ###############
+        # st.session_state["hit_response_ids"] = [
+        #                                         54,
+        #                                         52,
+        #                                         55,
+        #                                         30,
+        #                                         30,
+        #                                     ]
+        # st.session_state["hit_ops"] = [
+        #                                 "Paraphrased",
+        #                                 "Entailed",
+        #                                 "Paraphrased",
+        #                                 "Abstractive",
+        #                                 "Paraphrased",
                                         
-                                    ]
+        #                             ]
+        # hit_df_rows = []
+        # for i in range(len(st.session_state["hit_response_ids"])):
+        #     curr_response_id = st.session_state["hit_response_ids"][i]
+        #     curr_hit_op = st.session_state["hit_ops"][i]
+        #     curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
+        #     hit_df_rows.append(curr_row)
+        # hit_df = pd.concat(hit_df_rows, ignore_index=True)
+        # st.session_state["total_tasks"] = len(st.session_state["hit_response_ids"])
+
+    elif ("Teddi Eli5 Debug" == st.session_state["username"]):
+        st.session_state["hit_response_ids"] = [1]
+        st.session_state["hit_ops"] = ['Quoted', 'Entailed']
         hit_df_rows = []
         for i in range(len(st.session_state["hit_response_ids"])):
             curr_response_id = st.session_state["hit_response_ids"][i]
@@ -133,12 +175,17 @@ if (st.session_state["username"]):
             curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
             hit_df_rows.append(curr_row)
         hit_df = pd.concat(hit_df_rows, ignore_index=True)
-        st.session_state["total_tasks"] = len(st.session_state["hit_response_ids"])
-
-    elif ("Teddi Eli5 Debug" == st.session_state["username"]):
-        st.session_state["hit_response_ids"] = [45]
-        st.session_state["hit_ops"] = ['Entailed']
-        hit_df = df[(df['ID']==st.session_state["hit_response_ids"][0])&(df['op']==st.session_state["hit_ops"][0])]
+    elif ("Teddi MH Debug" == st.session_state["username"]):
+        # (50, Quoted)
+        st.session_state["hit_response_ids"] = [46, 58, 56, 41]
+        st.session_state["hit_ops"] = ['Quoted', 'Entailed', 'Entailed', 'Paraphrased']
+        hit_df_rows = []
+        for i in range(len(st.session_state["hit_response_ids"])):
+            curr_response_id = st.session_state["hit_response_ids"][i]
+            curr_hit_op = st.session_state["hit_ops"][i]
+            curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
+            hit_df_rows.append(curr_row)
+        hit_df = pd.concat(hit_df_rows, ignore_index=True)
     else:
         i = 0
         n_hit = 0
