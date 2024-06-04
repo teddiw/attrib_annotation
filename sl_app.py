@@ -52,7 +52,6 @@ if (st.session_state["username"]):
         st.session_state['annotations_db'] = 'mturk_trial_annotations' # 'annotations_trial'
         instances_to_annotate = 'mturk_trial_ita'# 'instances_to_annotate_mturk_trial' # not used
         st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
-        breakpoint()
     elif ("_NQ" in st.session_state["username"][-3:]):
         conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_nq_annotations'
@@ -231,7 +230,6 @@ if (st.session_state["username"]):
     st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0
-    breakpoint()
     st.switch_page('pages/response_level.py')
   
 
