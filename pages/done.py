@@ -17,7 +17,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-if (st.session_state["hit_specific_id"] != 1):
+if (int(st.session_state["hit_specific_id"]) != 1):
 # if mturk user:
 # create mturk client
     MTURK_SANDBOX = 'https://mturk-requester-sandbox.us-east-1.amazonaws.com'

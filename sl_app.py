@@ -45,7 +45,7 @@ st.session_state["hit_specific_id"] = st.query_params['hit_specific_id']
 st.session_state["hit_finished"] = False
 
 if (st.session_state["username"]):
-    if (st.session_state["hit_specific_id"] != 1):
+    if (int(st.session_state["hit_specific_id"]) != 1):
         # NQ
         conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_nq_annotations'
@@ -118,6 +118,7 @@ if (st.session_state["username"]):
             promised_ops = row['promised_ops']
     if (touched_response_ids is None):
         st.switch_page('pages/unknown_user.py')
+    
 
     st.session_state['touched_response_ids'] = touched_response_ids
 
