@@ -45,60 +45,62 @@ st.session_state["hit_specific_id"] = st.query_params['hit_specific_id']
 st.session_state["hit_finished"] = False
 
 if (st.session_state["username"]):
-    st.session_state['annotator_db_str'] = 'annotators'
-    # Connect to google sheets
-    if ("_Trial" == st.session_state["username"][-6:]):
-        conn = st.connection("gsheets_mturk_trial", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_trial_annotations' # 'annotations_trial'
-        instances_to_annotate = 'mturk_trial_ita'# 'instances_to_annotate_mturk_trial' # not used
-        st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
-    elif ("_NQ" in st.session_state["username"][-3:]):
+    if (st.session_state["hit_specific_id"] != 1):
+        # NQ
         conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_nq_annotations'
         instances_to_annotate = 'mturk_nq_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    elif ("_ELI3" in st.session_state["username"][-5:]):
-        conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_eli3_annotations'
-        instances_to_annotate = 'mturk_eli3_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    elif ("_MH" in st.session_state["username"][-3:]):
-        conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_mh_annotations'
-        instances_to_annotate = 'mturk_mh_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    elif ("_EMR" in st.session_state["username"][-4:]):
-        conn = st.connection("gsheets_mturk_emr", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_emr_annotations'
-        instances_to_annotate = 'mturk_emr_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_annotators'
-    elif ("Practice" in st.session_state["username"]):
-        conn = st.connection("gsheets_trial", type=GSheetsConnection) 
-        # conn = st.connection("gsheets", type=GSheetsConnection)
-        # conn = st.connection("gsheets_practice", type=GSheetsConnection)
-        # conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
-        st.session_state['annotations_db'] = 'annotations_practice'
-        instances_to_annotate = 'instances_to_annotate_practice'
-    elif ("Teddi Eli5" == st.session_state["username"]):
-        conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
-        st.session_state['annotations_db'] = 'annotations_teddi_eli5'
-        instances_to_annotate = 'instances_to_annotate_teddi_eli5'
-    elif ("Teddi Eli5 Debug" == st.session_state["username"]):
-        conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
-        st.session_state['annotations_db'] = 'annotations_practice'
-        instances_to_annotate = 'instances_to_annotate_practice'
-    elif ("Teddi MH" == st.session_state["username"]):
-        conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
-        st.session_state['annotations_db'] = 'annotations_teddi_mh'
-        instances_to_annotate = 'instances_to_annotate_teddi_mh'
-    elif ("Teddi MH Debug" == st.session_state["username"]):
-        conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
-        st.session_state['annotations_db'] = 'annotations_practice'
-        instances_to_annotate = 'instances_to_annotate_practice'
+        st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
+        # # ELI3
+        # conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_eli3_annotations'
+        # instances_to_annotate = 'mturk_eli3_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_eli3_annotators'
+        # # MH
+        # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_mh_annotations'
+        # instances_to_annotate = 'mturk_mh_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_mh_annotators'
+        # # EMR
+        # conn = st.connection("gsheets_mturk_emr", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_emr_annotations'
+        # instances_to_annotate = 'mturk_emr_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_emr_annotators'
     else:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        instances_to_annotate = 'instances_to_annotate'
-        st.session_state['annotations_db'] = 'annotations'
+        st.session_state['annotator_db_str'] = 'annotators'
+        # Connect to google sheets
+        if ("_Trial" == st.session_state["username"][-6:]):
+            conn = st.connection("gsheets_mturk_trial", type=GSheetsConnection) 
+            st.session_state['annotations_db'] = 'mturk_trial_annotations' # 'annotations_trial'
+            instances_to_annotate = 'mturk_trial_ita'# 'instances_to_annotate_mturk_trial' # not used
+            st.session_state['annotator_db_str'] = 'mturk_trial_annotators'
+        elif ("Practice" in st.session_state["username"]):
+            conn = st.connection("gsheets_mturk_trial", type=GSheetsConnection) 
+            # conn = st.connection("gsheets", type=GSheetsConnection)
+            # conn = st.connection("gsheets_practice", type=GSheetsConnection)
+            # conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_practice'
+            instances_to_annotate = 'instances_to_annotate_practice'
+        elif ("Teddi Eli5" == st.session_state["username"]):
+            conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_teddi_eli5'
+            instances_to_annotate = 'instances_to_annotate_teddi_eli5'
+        elif ("Teddi Eli5 Debug" == st.session_state["username"]):
+            conn = st.connection("gsheets_teddi_eli5", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_practice'
+            instances_to_annotate = 'instances_to_annotate_practice'
+        elif ("Teddi MH" == st.session_state["username"]):
+            conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_teddi_mh'
+            instances_to_annotate = 'instances_to_annotate_teddi_mh'
+        elif ("Teddi MH Debug" == st.session_state["username"]):
+            conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_practice'
+            instances_to_annotate = 'instances_to_annotate_practice'
+        else:
+            conn = st.connection("gsheets", type=GSheetsConnection)
+            instances_to_annotate = 'instances_to_annotate'
+            st.session_state['annotations_db'] = 'annotations'
     
     # get data
     df = conn.read()
@@ -133,35 +135,6 @@ if (st.session_state["username"]):
         hit_df = df.iloc[:5] # already randomized in the spreadsheet
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         st.session_state["hit_ops"] = hit_df['op'].tolist()
-        ###############
-        # hit_df = df.iloc[:5]
-        # st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
-        # st.session_state["hit_ops"] = hit_df['op'].tolist()
-        ###############
-        # st.session_state["hit_response_ids"] = [
-        #                                         54,
-        #                                         52,
-        #                                         55,
-        #                                         30,
-        #                                         30,
-        #                                     ]
-        # st.session_state["hit_ops"] = [
-        #                                 "Paraphrased",
-        #                                 "Entailed",
-        #                                 "Paraphrased",
-        #                                 "Abstractive",
-        #                                 "Paraphrased",
-                                        
-        #                             ]
-        # hit_df_rows = []
-        # for i in range(len(st.session_state["hit_response_ids"])):
-        #     curr_response_id = st.session_state["hit_response_ids"][i]
-        #     curr_hit_op = st.session_state["hit_ops"][i]
-        #     curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
-        #     hit_df_rows.append(curr_row)
-        # hit_df = pd.concat(hit_df_rows, ignore_index=True)
-        # st.session_state["total_tasks"] = len(st.session_state["hit_response_ids"])
-
     elif ("Teddi Eli5 Debug" == st.session_state["username"]):
         st.session_state["hit_response_ids"] = [1]
         st.session_state["hit_ops"] = ['Quoted', 'Entailed']
