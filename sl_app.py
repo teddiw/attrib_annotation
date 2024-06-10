@@ -148,7 +148,7 @@ if (st.session_state["username"]):
         hit_df = pd.concat(hit_df_rows, ignore_index=True)
     elif ("Teddi MH Debug" == st.session_state["username"]):
         # (50, Quoted)
-        st.session_state["hit_response_ids"] = [41, 58, 56, 41]
+        st.session_state["hit_response_ids"] = [47, 58, 56, 41]
         st.session_state["hit_ops"] = ['Paraphrased', 'Entailed', 'Entailed', 'Paraphrased']
         hit_df_rows = []
         for i in range(len(st.session_state["hit_response_ids"])):

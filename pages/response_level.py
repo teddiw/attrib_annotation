@@ -178,7 +178,11 @@ if ("hit_df" in st.session_state):
         unmarked_response = "\n\n".join(snippets_to_show)
     else:
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
-
+        cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
+        sentences = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Sent (cited)'])
+        if (clear_ansi(sentences[0].strip()) not in clear_ansi(cited_response)):
+            if (clear_ansi(sentences[0].strip()) in clear_ansi("\'"+cited_response)):
+                unmarked_response = "\'"+format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
     with col1:
         fluency_container = st.empty()
         unmarked_response = replace_dollar_signs(unmarked_response)
@@ -451,8 +455,14 @@ if ("hit_df" in st.session_state):
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
                 # Display cited response with highlighted sentence
                 highlighted_response = clear_ansi(cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")
+                if (sentence.strip() in clear_ansi(cited_response)):
+                    highlighted_response = clear_ansi(cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")
+                elif (sentence.strip() in clear_ansi("\'"+cited_response)):
+                    highlighted_response = clear_ansi("\'"+cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")
                 highlighted_response = replace_dollar_signs(highlighted_response)
                 full_response_container.write("<p><b>Cited System Response:</b>\n\n"+highlighted_response+"</p>", unsafe_allow_html=True)
+                
+
                 # Get highlighted sources for this sentence
                 cited_sources_ls = eval(cited_sources)
                 citations_dict = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Citation Dict'])

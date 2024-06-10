@@ -41,11 +41,14 @@ if (int(st.session_state["hit_specific_id"]) != 1):
 
 
     worker_id = st.session_state["username"]
+
+    # TODO comment out to test mturk mode! also call mturk mode with url param 2
     response = mturk.associate_qualification_with_worker(
                 QualificationTypeId=NUM_TRIALS_QUAL_ID,
                 WorkerId=worker_id,
                 IntegerValue=num_worker_annotations
             )
+    
 completion_code = st.session_state["db_conn"].table("hit_completion_codes").select("completion_code").eq("hit_specific_id", st.session_state["hit_specific_id"]).execute().data[0]['completion_code']
 
 if (st.session_state["hit_finished"]):
