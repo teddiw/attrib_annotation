@@ -46,26 +46,30 @@ st.session_state["hit_finished"] = False
 
 if (st.session_state["username"]):
     if (int(st.session_state["hit_specific_id"]) != 1):
-        # NQ
-        conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_nq_annotations'
-        instances_to_annotate = 'mturk_nq_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
+        # # NQ
+        # conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_nq_annotations'
+        # instances_to_annotate = 'mturk_nq_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40'
         # # ELI3
         # conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_eli3_annotations'
         # instances_to_annotate = 'mturk_eli3_ita' 
         # st.session_state['annotator_db_str'] = 'mturk_qualified_eli3_annotators'
-        # # MH
-        # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
-        # st.session_state['annotations_db'] = 'mturk_mh_annotations'
-        # instances_to_annotate = 'mturk_mh_ita' 
-        # st.session_state['annotator_db_str'] = 'mturk_qualified_mh_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3KKCXPMQWIB6698RR1ZSF6BKSU9IZS'
+        # MH
+        conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_mh_annotations'
+        instances_to_annotate = 'mturk_mh_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_mh_annotators'
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '3QBA3SDJNY6XMNNNS49D7ALN5NXAPV'
         # # EMR
         # conn = st.connection("gsheets_mturk_emr", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_emr_annotations'
         # instances_to_annotate = 'mturk_emr_ita' 
         # st.session_state['annotator_db_str'] = 'mturk_qualified_emr_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3ROUCZRAY0LLODKEL1FO8OBTRKJREZ'
     else:
         st.session_state['annotator_db_str'] = 'annotators'
         # Connect to google sheets
@@ -94,7 +98,7 @@ if (st.session_state["username"]):
             st.session_state['annotations_db'] = 'annotations_teddi_mh'
             instances_to_annotate = 'instances_to_annotate_teddi_mh'
         elif ("Teddi MH Debug" == st.session_state["username"]):
-            conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
+            conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
             st.session_state['annotations_db'] = 'annotations_practice'
             instances_to_annotate = 'instances_to_annotate_practice'
         else:
@@ -148,7 +152,7 @@ if (st.session_state["username"]):
         hit_df = pd.concat(hit_df_rows, ignore_index=True)
     elif ("Teddi MH Debug" == st.session_state["username"]):
         # (50, Quoted)
-        st.session_state["hit_response_ids"] = [47, 58, 56, 41]
+        st.session_state["hit_response_ids"] = [60, 100, 140, 180]
         st.session_state["hit_ops"] = ['Paraphrased', 'Entailed', 'Entailed', 'Paraphrased']
         hit_df_rows = []
         for i in range(len(st.session_state["hit_response_ids"])):

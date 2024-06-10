@@ -31,20 +31,16 @@ if (int(st.session_state["hit_specific_id"]) != 1):
     # get new number of completed HITs for this group
     num_worker_annotations = len(st.session_state["db_conn"].table(st.session_state['annotations_db']).select("query_id").eq("annotator_id", st.session_state["username"]).execute().data)//5
     
-    # update the worker's qualification
+    
 
+    # The other values for non-trial task settings are set in sl_app.py
     # NUM_TRIALS_QUAL_ID = '3U4RTBK6TD4L9P0FWBFSBYPO1GXU24' # <-- Liang real for trial # '39DNHIB68BFFKDOSRKF3VZ9WE6V9EL' <-- Liang sandbox # Guestrin real '3LW1BECZ1OKIR84E7XGS2E027J5RS4' # Guestrin SB '3O42DSCJPU0X16ST9JDZLV1W82OX6J' 
-    NUM_TRIALS_QUAL_ID = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40' # <-- Liang real for NQ
-    # NUM_TRIALS_QUAL_ID = '3KKCXPMQWIB6698RR1ZSF6BKSU9IZS' # <-- Liang real for ELI3
-    # NUM_TRIALS_QUAL_ID = '3QBA3SDJNY6XMNNNS49D7ALN5NXAPV' # <-- Liang real for MH
-    # NUM_TRIALS_QUAL_ID = '3ROUCZRAY0LLODKEL1FO8OBTRKJREZ' # <-- Liang real for EMR
-
-
+    
+    # update the worker's qualification
     worker_id = st.session_state["username"]
-
-    # TODO comment out to test mturk mode! also call mturk mode with url param 2
+    # TODO comment out to test mturk mode (mturk mode = calling with url param 2)
     response = mturk.associate_qualification_with_worker(
-                QualificationTypeId=NUM_TRIALS_QUAL_ID,
+                QualificationTypeId=st.session_state['NUM_TRIALS_QUAL_ID'],
                 WorkerId=worker_id,
                 IntegerValue=num_worker_annotations
             )
