@@ -13,4 +13,4 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-st.markdown('''# All tasks completed! :hibiscus:\n### No more tasks at this time.''')
+st.markdown('''# All tasks completed for your Worker ID! :hibiscus:\n### No more tasks for your Worker ID at this time.\n### More HITs will be released Friday 3 PM PST and Saturday 10 AM PST.''')

@@ -94,9 +94,13 @@ if (st.session_state["username"]):
             st.session_state['annotations_db'] = 'annotations_practice'
             instances_to_annotate = 'instances_to_annotate_practice'
         elif ("Teddi MH" == st.session_state["username"]):
-            conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
-            st.session_state['annotations_db'] = 'annotations_teddi_mh'
-            instances_to_annotate = 'instances_to_annotate_teddi_mh'
+            # conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
+            # st.session_state['annotations_db'] = 'annotations_teddi_mh'
+            # instances_to_annotate = 'instances_to_annotate_teddi_mh'
+            # reeval for mturk:
+            conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_teddi_reeval_mh'
+            instances_to_annotate = 'reeval_ita'
         elif ("Teddi MH Debug" == st.session_state["username"]):
             # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
             conn = st.connection("gsheets_teddi_nq", type=GSheetsConnection)
@@ -203,7 +207,7 @@ if (st.session_state["username"]):
             rows_to_annotate.append(df[(df['ID']==query_id)&(df['op']==op)])
         if (len(rows_to_annotate)==0):
             st.switch_page('pages/no_more.py')
-    
+            
         hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
 
     promised_query_ids.append(st.session_state["hit_response_ids"]+[-1]*(5-len(st.session_state["hit_response_ids"])))
