@@ -98,9 +98,14 @@ if (st.session_state["username"]):
             st.session_state['annotations_db'] = 'annotations_teddi_mh'
             instances_to_annotate = 'instances_to_annotate_teddi_mh'
         elif ("Teddi MH Debug" == st.session_state["username"]):
-            conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
+            # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
+            conn = st.connection("gsheets_teddi_nq", type=GSheetsConnection)
             st.session_state['annotations_db'] = 'annotations_practice'
             instances_to_annotate = 'instances_to_annotate_practice'
+        elif ("Teddi NQ" == st.session_state["username"]):
+            conn = st.connection("gsheets_teddi_nq", type=GSheetsConnection)
+            st.session_state['annotations_db'] = 'annotations_teddi_nq'
+            instances_to_annotate = 'instances_to_annotate_teddi_nq'
         else:
             conn = st.connection("gsheets", type=GSheetsConnection)
             instances_to_annotate = 'instances_to_annotate'
@@ -152,8 +157,8 @@ if (st.session_state["username"]):
         hit_df = pd.concat(hit_df_rows, ignore_index=True)
     elif ("Teddi MH Debug" == st.session_state["username"]):
         # (50, Quoted)
-        st.session_state["hit_response_ids"] = [60, 100, 140, 180]
-        st.session_state["hit_ops"] = ['Paraphrased', 'Entailed', 'Entailed', 'Paraphrased']
+        st.session_state["hit_response_ids"] = [34, 26, 34, 34, 34]
+        st.session_state["hit_ops"] = ['Entailed', 'Snippet', 'Entailed', 'Paraphrased', 'Abstractive']
         hit_df_rows = []
         for i in range(len(st.session_state["hit_response_ids"])):
             curr_response_id = st.session_state["hit_response_ids"][i]
