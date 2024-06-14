@@ -46,12 +46,12 @@ st.session_state["hit_finished"] = False
 
 if (st.session_state["username"]):
     if (int(st.session_state["hit_specific_id"]) != 1):
-        # # NQ
-        # conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
-        # st.session_state['annotations_db'] = 'mturk_nq_annotations'
-        # instances_to_annotate = 'mturk_nq_ita' 
-        # st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
-        # st.session_state['NUM_TRIALS_QUAL_ID'] = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40'
+        # NQ
+        conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_nq_annotations'
+        instances_to_annotate = 'mturk_nq_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40'
         # # ELI3
         # conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_eli3_annotations'
@@ -59,11 +59,11 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_eli3_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3KKCXPMQWIB6698RR1ZSF6BKSU9IZS'
         # MH
-        conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_mh_annotations'
-        instances_to_annotate = 'mturk_mh_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_mh_annotators'
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '3QBA3SDJNY6XMNNNS49D7ALN5NXAPV'
+        # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_mh_annotations'
+        # instances_to_annotate = 'mturk_mh_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_mh_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3QBA3SDJNY6XMNNNS49D7ALN5NXAPV'
         # # EMR
         # conn = st.connection("gsheets_mturk_emr", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_emr_annotations'
@@ -97,10 +97,16 @@ if (st.session_state["username"]):
             # conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
             # st.session_state['annotations_db'] = 'annotations_teddi_mh'
             # instances_to_annotate = 'instances_to_annotate_teddi_mh'
+
             # reeval for mturk:
-            conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
-            st.session_state['annotations_db'] = 'annotations_teddi_reeval_mh'
-            instances_to_annotate = 'reeval_ita'
+            # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
+            # st.session_state['annotations_db'] = 'annotations_teddi_reeval_mh'
+            # instances_to_annotate = 'reeval_ita'
+
+            # mturk debug
+            conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
+            st.session_state['annotations_db'] = 'annotations_practice'
+            instances_to_annotate = 'mturk_mh_ita' 
         elif ("Teddi MH Debug" == st.session_state["username"]):
             # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
             conn = st.connection("gsheets_teddi_nq", type=GSheetsConnection)
@@ -137,6 +143,8 @@ if (st.session_state["username"]):
 
     # get instances that still need annotation
     remaining_response_ids = pd.DataFrame(db_conn.table(instances_to_annotate).select("*").execute().data)
+    if (len(remaining_response_ids) == 0):
+        st.switch_page('pages/no_more.py')
     remaining_response_ids = remaining_response_ids.sort_values(by='query_id', ascending=True)
     viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
     st.session_state["total_tasks"] = 5
@@ -209,6 +217,8 @@ if (st.session_state["username"]):
             st.switch_page('pages/no_more.py')
             
         hit_df = pd.concat(rows_to_annotate, ignore_index=True) # yay :D
+        if ((len(hit_df)==0) or (st.session_state["total_tasks"]==0)):
+            st.switch_page('pages/no_more.py')
 
     promised_query_ids.append(st.session_state["hit_response_ids"]+[-1]*(5-len(st.session_state["hit_response_ids"])))
     promised_ops.append(st.session_state["hit_ops"]+["Null"]*(5-len(st.session_state["hit_response_ids"])))
