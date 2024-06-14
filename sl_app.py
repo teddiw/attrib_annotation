@@ -95,18 +95,15 @@ if (st.session_state["username"]):
             instances_to_annotate = 'instances_to_annotate_practice'
         elif ("Teddi MH" == st.session_state["username"]):
             # conn = st.connection("gsheets_teddi_mh", type=GSheetsConnection)
-            # st.session_state['annotations_db'] = 'annotations_teddi_mh'
-            # instances_to_annotate = 'instances_to_annotate_teddi_mh'
+            conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
+            st.session_state['annotations_db'] = 'annotations_practice'
+            instances_to_annotate = 'instances_to_annotate_practice'
 
-            # reeval for mturk:
+            # # reeval for mturk:
             # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
             # st.session_state['annotations_db'] = 'annotations_teddi_reeval_mh'
             # instances_to_annotate = 'reeval_ita'
 
-            # mturk debug
-            conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection) 
-            st.session_state['annotations_db'] = 'annotations_practice'
-            instances_to_annotate = 'mturk_mh_ita' 
         elif ("Teddi MH Debug" == st.session_state["username"]):
             # conn = st.connection("gsheets_mturk_mh", type=GSheetsConnection)
             conn = st.connection("gsheets_teddi_nq", type=GSheetsConnection)
