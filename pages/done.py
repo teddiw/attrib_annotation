@@ -31,8 +31,6 @@ if (int(st.session_state["hit_specific_id"]) != 1):
     # get new number of completed HITs for this group
     num_worker_annotations = len(st.session_state["db_conn"].table(st.session_state['annotations_db']).select("query_id").eq("annotator_id", st.session_state["username"]).execute().data)//5
     
-    
-
     # The other values for non-trial task settings are set in sl_app.py
     # NUM_TRIALS_QUAL_ID = '3U4RTBK6TD4L9P0FWBFSBYPO1GXU24' # <-- Liang real for trial # '39DNHIB68BFFKDOSRKF3VZ9WE6V9EL' <-- Liang sandbox # Guestrin real '3LW1BECZ1OKIR84E7XGS2E027J5RS4' # Guestrin SB '3O42DSCJPU0X16ST9JDZLV1W82OX6J' 
     
@@ -48,7 +46,7 @@ if (int(st.session_state["hit_specific_id"]) != 1):
 completion_code = st.session_state["db_conn"].table("hit_completion_codes").select("completion_code").eq("hit_specific_id", st.session_state["hit_specific_id"]).execute().data[0]['completion_code']
 
 if (st.session_state["hit_finished"]):
-    # this is redundant because it errors if you directly access the done page
+    # this check is redundant because it errors if you directly access the done page
     st.markdown('''# Done! Thank you so much! :raised_hands:''')
     st.markdown('''Please enter the one-time-use completion code below on the MTurk HIT webpage for compensation.''')
     st.markdown(completion_code)

@@ -67,7 +67,7 @@ def save_time(i, task_str):
 def get_substring_indices(text, substring):
     i = 0
     ocurrences = []
-    for i in range(len(text)-len(substring)):
+    for i in range(len(text)-len(substring)+1):
         if (substring == text[i:i+len(substring)]):
             ocurrences.append((i,i+len(substring)))
     return ocurrences
@@ -324,7 +324,7 @@ if ("hit_df" in st.session_state):
                     return
 
                 def eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder, highlighted_cited_sources):
-                     # clear any previous coverage question container
+                    # clear any previous coverage question container
                     if (i > 0):
                         placeholders_prec_text[i].empty()
                         for j in range(0, len(placeholders_prec[i])):
@@ -350,7 +350,7 @@ if ("hit_df" in st.session_state):
                             cov_results.append({"sentence_id": i, "coverage": 1})
                         elif cov_result == "No":
                             cov_results.append({"sentence_id": i, "coverage": 0}) 
-                        else:
+                        else: # elif cov_result == "NA": # <-- change to this?
                             cov_results.append({"sentence_id": i, "coverage": -1})                           
                         
                         cov_result = None
@@ -525,10 +525,3 @@ if ("hit_df" in st.session_state):
                 # Proceed to coverage & then the next sentence
                 eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder, highlighted_cited_sources)
                     
-
-
-
-
-
-
-
