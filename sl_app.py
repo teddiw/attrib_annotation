@@ -266,8 +266,8 @@ if (st.session_state["username"]):
             remaining_ops_shuffled_copy = random.sample(remaining_ops.copy(), len(remaining_ops))
             for op in remaining_ops_shuffled_copy:
                 # if this op is not yet in the hit, add it
-                # if (op not in hit_op_ls):
-                if (True):
+                if (op not in hit_op_ls):
+                # if (True):
                     hit_op_ls.append(op)
                     query_id = int(instance['query_id'])
                     hit_id_ls.append(query_id)
