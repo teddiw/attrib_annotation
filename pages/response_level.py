@@ -338,7 +338,7 @@ if ("hit_df" in st.session_state):
                     if ((cov_pressed and cov_result) or st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):
                         if (not st.session_state['cov_continue_press_sentence'+str(i)+'_task'+str(st.session_state["task_n"])]):
                             # if pressed for the first time (not on a internal page re-run), record the time
-                            save_time(i,'cov') # TODO change what's needed in this fn to swap
+                            save_time(i,'cov') 
                         
                         # Set coverage submission button variables and remove the button
                         cov_pressed = False

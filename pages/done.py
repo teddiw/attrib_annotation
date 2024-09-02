@@ -29,7 +29,7 @@ if (int(st.session_state["hit_specific_id"]) != 1):
                         endpoint_url = MTURK
                         )
     # get new number of completed HITs for this group
-    num_worker_annotations = len(st.session_state["db_conn"].table(st.session_state['annotations_db']).select("query_id").eq("annotator_id", st.session_state["username"]).execute().data)//5
+    num_worker_annotations = len(st.session_state["db_conn"].table(st.session_state['annotations_db']).select("query_id").eq("annotator_id", st.session_state["username"]).execute().data)//st.session_state["total_tasks"]
     
     # The other values for non-trial task settings are set in sl_app.py
     # NUM_TRIALS_QUAL_ID = '3U4RTBK6TD4L9P0FWBFSBYPO1GXU24' # <-- Liang real for trial # '39DNHIB68BFFKDOSRKF3VZ9WE6V9EL' <-- Liang sandbox # Guestrin real '3LW1BECZ1OKIR84E7XGS2E027J5RS4' # Guestrin SB '3O42DSCJPU0X16ST9JDZLV1W82OX6J' 
