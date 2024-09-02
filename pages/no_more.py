@@ -13,4 +13,4 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-st.markdown('''# All tasks completed! :hibiscus:\n### No more tasks at this time.''')
+st.markdown('''# All tasks completed! :hibiscus:\n### No more tasks at this time.\n### Please return this HIT.''')

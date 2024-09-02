@@ -67,7 +67,7 @@ def save_time(i, task_str):
 def get_substring_indices(text, substring):
     i = 0
     ocurrences = []
-    for i in range(len(text)-len(substring)):
+    for i in range(len(text)-len(substring)+1):
         if (substring == text[i:i+len(substring)]):
             ocurrences.append((i,i+len(substring)))
     return ocurrences
@@ -112,14 +112,14 @@ def get_cited_sources_for_sentence(cited_sources_ls, citations):
 
     sources_to_show = []
     for source_idx in sources_idxs_to_show.keys(): 
-        curr_source = clear_ansi(cited_sources_ls[source_idx])
+        curr_source = clear_ansi(cited_sources_ls[source_idx]).strip()
         curr_source_ls = curr_source.split('\n')
         if ('https://' in curr_source_ls[0]):
             curr_source_ls = curr_source.split('\n')
             curr_url = curr_source_ls[0][8:]
             if (curr_url[:4] == 'www.'):
                 curr_url = curr_url[4:]
-            curr_source = ' '.join(curr_source_ls[1:])
+            curr_source = ' '.join(curr_source_ls[1:]).strip()
             sources_to_show.append(replace_dollar_signs('<b>Source: </b>'+curr_url+'\n\n'+curr_source))
         else:
             sources_to_show.append(replace_dollar_signs('<b>Source: </b>\n\n'+curr_source))
@@ -161,7 +161,33 @@ st.markdown(
 ) 
 
 def replace_dollar_signs(text):
-    return text.replace('$', '\$')
+    return text.replace('$', '\$').strip()
+
+def continue_from_snippet(response_id, fluency_rating, utility_rating):
+    # write results to db
+    st.session_state.db_conn.table(st.session_state['annotations_db']).insert({
+    "annotator_id": st.session_state["username"], 
+    "human_fluency_rating": int(fluency_rating),
+    "human_utility_rating": int(utility_rating),
+    "op": op,
+    "query_id":int(response_id),
+    }).execute()    
+    st.session_state['touched_response_ids'] += [int(response_id)]
+    st.session_state.db_conn.table(st.session_state['annotator_db_str']).update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
+    
+    # reset fluency/utility button press
+    st.session_state["b1_press"] = False
+
+    # increment to the next task
+    if (st.session_state["task_n"]<st.session_state["total_tasks"]-1):
+        st.session_state["task_n"] += 1
+        st.session_state['prec_t2v'] = []
+        st.session_state['cov_t2v'] = []
+        st.session_state['ANSI_TO_MD_IDX'] = {}
+        st.switch_page('pages/response_level.py')
+    else:
+        st.session_state["hit_finished"] = True
+        st.switch_page('pages/done.py')
 
 if ("hit_df" in st.session_state):
     st.header("Task "+str(st.session_state["task_n"]+1)+"/"+str(st.session_state["total_tasks"]))
@@ -175,14 +201,24 @@ if ("hit_df" in st.session_state):
     if (op == 'Snippet'):
         unmarked_response = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
         snippets_to_show = get_highlighted_snippet(unmarked_response)
+        
+        if (len(snippets_to_show) == 0):
+            response_id = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['ID']
+            continue_from_snippet(response_id, -1, -1)
+    
         unmarked_response = "\n\n".join(snippets_to_show)
+        
     else:
         unmarked_response = format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
-
+        cited_response = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output (cited)']
+        sentences = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Sent (cited)'])
+        if (clear_ansi(sentences[0].strip()) not in clear_ansi(cited_response)):
+            if (clear_ansi(sentences[0].strip()) in clear_ansi("\'"+cited_response)):
+                unmarked_response = "\'"+format_remove_quotation_marks(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Output'])
     with col1:
         fluency_container = st.empty()
-        unmarked_response = replace_dollar_signs(unmarked_response)
-        full_response_container.write("<p><b>System Response:</b>\n\n"+unmarked_response+"</p>", unsafe_allow_html=True)
+        unmarked_response = replace_dollar_signs(unmarked_response) 
+        full_response_container.write("<p><b>System Response:</b>\n\n"+unmarked_response+"</p>", unsafe_allow_html=True)    
 
     fluency_options = ['1: Response has misprints or disfluent transitions and sentences', 
                        '2: Response has no misprints and mostly smooth transitions and sentences', 
@@ -225,32 +261,8 @@ if ("hit_df" in st.session_state):
                 op = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['op']
                 response_id = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['ID']
                 if (op == 'Snippet'):
-                    # write results to db
-                    st.session_state.db_conn.table(st.session_state['annotations_db']).insert({
-                    "annotator_id": st.session_state["username"], 
-                    "human_fluency_rating": int(st.session_state["fluency_rating"]),
-                    "human_utility_rating": int(st.session_state["utility_rating"]),
-                    "op": op,
-                    "query_id":int(response_id),
-                    }).execute()    
-                    st.session_state['touched_response_ids'] += [int(response_id)]
-                    st.session_state.db_conn.table(st.session_state['annotator_db_str']).update({'annotated_query_ids': st.session_state['touched_response_ids']}).eq('annotator_id', st.session_state["username"]).execute()
+                    continue_from_snippet(response_id, st.session_state["fluency_rating"], st.session_state["utility_rating"])
                     
-                    # reset fluency/utility button press
-                    st.session_state["b1_press"] = False
-
-                    # increment to the next task
-                    if (st.session_state["task_n"]<st.session_state["total_tasks"]-1):
-                        st.session_state["task_n"] += 1
-                        st.session_state['prec_t2v'] = []
-                        st.session_state['cov_t2v'] = []
-                        st.session_state['ANSI_TO_MD_IDX'] = {}
-                        st.switch_page('pages/response_level.py')
-                    else:
-                        st.session_state["hit_finished"] = True
-                        st.switch_page('pages/done.py')
-                    
-                
                 sentences = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Sent (cited)'])
                 num_sentences = len(sentences)
                 prec_results = []
@@ -312,7 +324,7 @@ if ("hit_df" in st.session_state):
                     return
 
                 def eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder, highlighted_cited_sources):
-                     # clear any previous coverage question container
+                    # clear any previous coverage question container
                     if (i > 0):
                         placeholders_prec_text[i].empty()
                         for j in range(0, len(placeholders_prec[i])):
@@ -338,7 +350,7 @@ if ("hit_df" in st.session_state):
                             cov_results.append({"sentence_id": i, "coverage": 1})
                         elif cov_result == "No":
                             cov_results.append({"sentence_id": i, "coverage": 0}) 
-                        else:
+                        else: # elif cov_result == "NA": # <-- change to this?
                             cov_results.append({"sentence_id": i, "coverage": -1})                           
                         
                         cov_result = None
@@ -451,8 +463,14 @@ if ("hit_df" in st.session_state):
                 cited_sources = st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Used Sources (cited)']
                 # Display cited response with highlighted sentence
                 highlighted_response = clear_ansi(cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")
+                if (sentence.strip() in clear_ansi(cited_response)):
+                    highlighted_response = clear_ansi(cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")
+                elif (sentence.strip() in clear_ansi("\'"+cited_response)):
+                    highlighted_response = clear_ansi("\'"+cited_response).replace(sentence.strip(), "<span class='orange-highlight'>"+sentence.strip()+"</span>")
                 highlighted_response = replace_dollar_signs(highlighted_response)
                 full_response_container.write("<p><b>Cited System Response:</b>\n\n"+highlighted_response+"</p>", unsafe_allow_html=True)
+                
+
                 # Get highlighted sources for this sentence
                 cited_sources_ls = eval(cited_sources)
                 citations_dict = eval(st.session_state["hit_df"].iloc[st.session_state["task_n"]]['Citation Dict'])
@@ -507,10 +525,3 @@ if ("hit_df" in st.session_state):
                 # Proceed to coverage & then the next sentence
                 eval_next_sentence(cov_pressed, cov_result, citations_dict, i, save_time, col2_container, sources_placeholder, highlighted_cited_sources)
                     
-
-
-
-
-
-
-
