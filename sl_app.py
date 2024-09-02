@@ -72,18 +72,18 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_emr_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3ROUCZRAY0LLODKEL1FO8OBTRKJREZ'
         # REQUAL
-        conn = st.connection("gsheets_mturk_requal", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_requal_annotations'
-        # instances_to_annotate = '' # not needed because the instances are fixed
-        st.session_state['annotator_db_str'] = 'mturk_qualified_requal_annotators'
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '3M0XATTAEN2FOUVZGJMZD95M85W95B' 
+        # conn = st.connection("gsheets_mturk_requal", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_requal_annotations'
+        # # instances_to_annotate = '' # not needed because the instances are fixed
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_requal_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3M0XATTAEN2FOUVZGJMZD95M85W95B' 
         # NQ BASELINE
-        # conn = st.connection("gsheets_mturk_nq_baseline", type=GSheetsConnection) 
-        # st.session_state['annotations_db'] = 'mturk_baseline_nq_annotations'
-        # instances_to_annotate = 'mturk_baseline_nq_ita' 
-        # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_nq_annotators'
-        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3TJ7PBKXJ9XGBEOPZ4O8EWR0TDWOGM'
-        # st.session_state["total_tasks"] = 3
+        conn = st.connection("gsheets_mturk_nq_baseline", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_baseline_nq_annotations'
+        instances_to_annotate = 'mturk_baseline_nq_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_nq_annotators'
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '3TJ7PBKXJ9XGBEOPZ4O8EWR0TDWOGM'
+        st.session_state["total_tasks"] = 3
         # # ELI3 BASELINE
         # conn = st.connection("gsheets_mturk_eli3_baseline", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_baseline_eli3_annotations'
