@@ -37,11 +37,12 @@ if (int(st.session_state["hit_specific_id"]) != 1):
     # update the worker's qualification
     worker_id = st.session_state["username"]
     # TODO comment out to test mturk mode (mturk mode = calling with url param 2)
-    response = mturk.associate_qualification_with_worker(
-                QualificationTypeId=st.session_state['NUM_TRIALS_QUAL_ID'],
-                WorkerId=worker_id,
-                IntegerValue=num_worker_annotations
-            )
+    # not needed for quoted only
+    # response = mturk.associate_qualification_with_worker(
+    #             QualificationTypeId=st.session_state['NUM_TRIALS_QUAL_ID'],
+    #             WorkerId=worker_id,
+    #             IntegerValue=num_worker_annotations
+    #         )
     
 completion_code = st.session_state["db_conn"].table("hit_completion_codes").select("completion_code").eq("hit_specific_id", st.session_state["hit_specific_id"]).execute().data[0]['completion_code']
 

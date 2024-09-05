@@ -91,13 +91,13 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_eli3_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3KYNP8H8ZS0AO2O8FRSPT69O7LQTHC'
         # st.session_state["total_tasks"] = 3
-        # MH BASELINE
+        # MH QUOTED ONLY BASELINE
         conn = st.connection("gsheets_mturk_mh_baseline", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_baseline_mh_annotations'
-        instances_to_annotate = 'mturk_baseline_mh_ita' 
+        instances_to_annotate = 'mturk_baseline_mh_quoted_only_ita' 
         st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_mh_annotators'
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '3BERVBF4P9WYI5LQ8ANTAW3U8EIYPB'
-        st.session_state["total_tasks"] = 3
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3BERVBF4P9WYI5LQ8ANTAW3U8EIYPB'
+        st.session_state["total_tasks"] = 13
         # MASH BASELINE
         # conn = st.connection("gsheets_mturk_mash_baseline", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_baseline_mash_annotations'
@@ -212,8 +212,8 @@ if (st.session_state["username"]):
     viable_response_ids = remaining_response_ids[~remaining_response_ids['query_id'].isin(touched_response_ids)]
     
     # hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
-    if ("_Trial" == st.session_state["username"][-6:]):
-        hit_df = df.iloc[:5] # already randomized in the spreadsheet
+    if (True):
+        hit_df = df.iloc[:13] # already randomized in the spreadsheet
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
         st.session_state["hit_ops"] = hit_df['op'].tolist()
     elif ("Practice" in st.session_state["username"]):
