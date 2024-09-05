@@ -213,9 +213,15 @@ if (st.session_state["username"]):
     
     # hit_response_ids_df = viable_response_ids.iloc[:min(len(viable_response_ids), st.session_state["total_tasks"])]
     if (True):
-        hit_df = df.iloc[:13] # already randomized in the spreadsheet
-        st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
-        st.session_state["hit_ops"] = hit_df['op'].tolist()
+        st.session_state["hit_response_ids"] = [204,205,206,207,208,209,210,211,212,213,214,215,216]
+        st.session_state["hit_ops"] = ['Quoted']*len(st.session_state["hit_response_ids"])
+        hit_df_rows = []
+        for i in range(len(st.session_state["hit_response_ids"])):
+            curr_response_id = st.session_state["hit_response_ids"][i]
+            curr_hit_op = st.session_state["hit_ops"][i]
+            curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
+            hit_df_rows.append(curr_row)
+        hit_df = pd.concat(hit_df_rows, ignore_index=True)
     elif ("Practice" in st.session_state["username"]):
         hit_df = df.iloc[:5] # already randomized in the spreadsheet
         st.session_state["hit_response_ids"] = hit_df['ID'].tolist()
@@ -297,7 +303,7 @@ if (st.session_state["username"]):
 
     promised_query_ids.append(st.session_state["hit_response_ids"]+[-1]*(st.session_state["total_tasks"]-len(st.session_state["hit_response_ids"])))
     promised_ops.append(st.session_state["hit_ops"]+["Null"]*(st.session_state["total_tasks"]-len(st.session_state["hit_response_ids"])))
-    db_conn.table(st.session_state['annotator_db_str']).update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
+    # db_conn.table(st.session_state['annotator_db_str']).update({'promised_query_ids': promised_query_ids,  'promised_ops':promised_ops}).eq('annotator_id', st.session_state["username"]).execute()
     st.session_state["total_tasks"] = min(st.session_state["total_tasks"], len(hit_df))
     st.session_state["hit_df"] = hit_df
     st.session_state["task_n"] = 0
