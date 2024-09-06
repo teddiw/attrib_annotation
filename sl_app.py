@@ -84,13 +84,13 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_nq_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3TJ7PBKXJ9XGBEOPZ4O8EWR0TDWOGM'
         # st.session_state["total_tasks"] = 3
-        # ELI3 BASELINE
-        conn = st.connection("gsheets_mturk_eli3_baseline", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_baseline_eli3_annotations'
-        instances_to_annotate = 'mturk_baseline_eli3_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_eli3_annotators'
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '3KYNP8H8ZS0AO2O8FRSPT69O7LQTHC'
-        st.session_state["total_tasks"] = 3
+        # # ELI3 BASELINE
+        # conn = st.connection("gsheets_mturk_eli3_baseline", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_baseline_eli3_annotations'
+        # instances_to_annotate = 'mturk_baseline_eli3_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_eli3_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3KYNP8H8ZS0AO2O8FRSPT69O7LQTHC'
+        # st.session_state["total_tasks"] = 3
         # # MH BASELINE
         # conn = st.connection("gsheets_mturk_mh_baseline", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_baseline_mh_annotations'
@@ -98,13 +98,13 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_mh_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3BERVBF4P9WYI5LQ8ANTAW3U8EIYPB'
         # st.session_state["total_tasks"] = 3
-        # MASH BASELINE
-        # conn = st.connection("gsheets_mturk_mash_baseline", type=GSheetsConnection) 
-        # st.session_state['annotations_db'] = 'mturk_baseline_mash_annotations'
-        # instances_to_annotate = 'mturk_baseline_mash_ita' 
-        # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_emr_annotators'
-        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3Q14PV9RQ8GV7WDA45OSF5YPWOYM15'
-        # st.session_state["total_tasks"] = 3
+        MASH BASELINE
+        conn = st.connection("gsheets_mturk_mash_baseline", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_baseline_mash_annotations'
+        instances_to_annotate = 'mturk_baseline_mash_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_mash_annotators'
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '3Q14PV9RQ8GV7WDA45OSF5YPWOYM15'
+        st.session_state["total_tasks"] = 3
     else:
         st.session_state['annotator_db_str'] = 'annotators'
         # Connect to google sheets
