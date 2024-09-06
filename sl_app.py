@@ -98,7 +98,7 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_mh_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3BERVBF4P9WYI5LQ8ANTAW3U8EIYPB'
         # st.session_state["total_tasks"] = 3
-        MASH BASELINE
+        # MASH BASELINE
         conn = st.connection("gsheets_mturk_mash_baseline", type=GSheetsConnection) 
         st.session_state['annotations_db'] = 'mturk_baseline_mash_annotations'
         instances_to_annotate = 'mturk_baseline_mash_ita' 
