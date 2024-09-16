@@ -47,13 +47,13 @@ st.session_state["hit_finished"] = False
 if (st.session_state["username"]):
     st.session_state["total_tasks"] = 5
     if (int(st.session_state["hit_specific_id"]) != 1):
-        # NQ
-        conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_nq_annotations'
-        instances_to_annotate = 'mturk_nq_ita' 
-        st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40'
-        st.session_state["total_tasks"] = 3
+        # # NQ
+        # conn = st.connection("gsheets_mturk_nq", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_nq_annotations'
+        # instances_to_annotate = 'mturk_nq_ita' 
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_nq_annotators'
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '33LB4W8Z0K0VC3F20PYG4DMMLUTU40'
+        # st.session_state["total_tasks"] = 3
         # # ELI3
         # conn = st.connection("gsheets_mturk_eli3", type=GSheetsConnection) 
         # st.session_state['annotations_db'] = 'mturk_eli3_annotations'
@@ -106,6 +106,13 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_baseline_mash_annotators'
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3Q14PV9RQ8GV7WDA45OSF5YPWOYM15'
         # st.session_state["total_tasks"] = 3
+        # ALL
+        conn = st.connection("gsheets_mturk_ALL_NQ", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_baseline_all_nq_annotations'
+        instances_to_annotate = 'mturk_baseline_all_nq_ita' 
+        st.session_state['annotator_db_str'] = 'mturk_qualified_all_nq_annotators'
+        st.session_state['NUM_TRIALS_QUAL_ID'] = # TODO
+        st.session_state["total_tasks"] = 7
     else:
         st.session_state['annotator_db_str'] = 'annotators'
         # Connect to google sheets
@@ -167,6 +174,13 @@ if (st.session_state["username"]):
             st.session_state['annotations_db'] = 'mturk_requal_annotations'
             # instances_to_annotate = '' # not needed because the instances are fixed
             st.session_state['annotator_db_str'] = 'mturk_qualified_requal_annotators'
+        elif ("All" == st.session_state["username"]):
+            conn = st.connection("gsheets_mturk_ALL_NQ", type=GSheetsConnection) 
+            st.session_state['annotations_db'] = 'mturk_baseline_all_nq_annotations'
+            instances_to_annotate = 'mturk_baseline_all_nq_ita' 
+            st.session_state['annotator_db_str'] = 'mturk_qualified_all_nq_annotators'
+            st.session_state['NUM_TRIALS_QUAL_ID'] = # TODO
+            st.session_state["total_tasks"] = 7
         else:
             conn = st.connection("gsheets", type=GSheetsConnection)
             instances_to_annotate = 'instances_to_annotate'
