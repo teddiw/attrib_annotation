@@ -107,12 +107,19 @@ if (st.session_state["username"]):
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3Q14PV9RQ8GV7WDA45OSF5YPWOYM15'
         # st.session_state["total_tasks"] = 3
 
-        # ALL NQ
-        conn = st.connection("gsheets_mturk_ALL_NQ", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_all_nq_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
-        instances_to_annotate = 'mturk_all_nq_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
-        st.session_state['annotator_db_str'] = 'mturk_qualified_all_nq_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '3D3MXTCY124IYA1JRGUEC9TD2AZC1I'
+        # # ALL NQ
+        # conn = st.connection("gsheets_mturk_ALL_NQ", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_all_nq_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+        # instances_to_annotate = 'mturk_all_nq_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_all_nq_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3D3MXTCY124IYA1JRGUEC9TD2AZC1I'
+        # st.session_state["total_tasks"] = 7
+        # ALL MH
+        conn = st.connection("gsheets_mturk_ALL_MH", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_all_mh_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+        instances_to_annotate = 'mturk_all_mh_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
+        st.session_state['annotator_db_str'] = 'mturk_qualified_all_mh_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '33AQ1MMGKMJRC87O87UFO30GUQH1WG'
         st.session_state["total_tasks"] = 7
     else:
         st.session_state['annotator_db_str'] = 'annotators'
