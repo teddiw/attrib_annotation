@@ -114,12 +114,19 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_all_nq_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '3D3MXTCY124IYA1JRGUEC9TD2AZC1I'
         # st.session_state["total_tasks"] = 7
-        # ALL MH
-        conn = st.connection("gsheets_mturk_ALL_MH", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_all_mh_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
-        instances_to_annotate = 'mturk_all_mh_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
-        st.session_state['annotator_db_str'] = 'mturk_qualified_all_mh_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '33AQ1MMGKMJRC87O87UFO30GUQH1WG'
+        # # ALL MH
+        # conn = st.connection("gsheets_mturk_ALL_MH", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_all_mh_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+        # instances_to_annotate = 'mturk_all_mh_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_all_mh_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '33AQ1MMGKMJRC87O87UFO30GUQH1WG'
+        # st.session_state["total_tasks"] = 7
+        # ALL ELI3G
+        conn = st.connection("gsheets_mturk_ALL_ELI3", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_all_eli3_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+        instances_to_annotate = 'mturk_all_eli3_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
+        st.session_state['annotator_db_str'] = 'mturk_qualified_all_eli3_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '3SHVTVENCC25086JERQKVETHIULJSN'
         st.session_state["total_tasks"] = 7
     else:
         st.session_state['annotator_db_str'] = 'annotators'
@@ -183,12 +190,11 @@ if (st.session_state["username"]):
             # instances_to_annotate = '' # not needed because the instances are fixed
             st.session_state['annotator_db_str'] = 'mturk_qualified_requal_annotators'
         elif ("All" == st.session_state["username"]):
-            conn = st.connection("gsheets_mturk_ALL_NQ", type=GSheetsConnection) 
-            st.session_state['annotations_db'] = 'mturk_all_nq_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
-            instances_to_annotate = 'mturk_all_nq_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
-            st.session_state['annotator_db_str'] = 'mturk_qualified_all_nq_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
-            st.session_state['NUM_TRIALS_QUAL_ID'] = 14
+            conn = st.connection("gsheets_mturk_ALL_MH", type=GSheetsConnection) 
+            st.session_state['annotations_db'] = 'annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+            st.session_state['annotator_db_str'] = 'annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
             st.session_state["total_tasks"] = 7
+            instances_to_annotate = 'mturk_trial_ita'
         else:
             conn = st.connection("gsheets", type=GSheetsConnection)
             instances_to_annotate = 'instances_to_annotate'
@@ -268,6 +274,17 @@ if (st.session_state["username"]):
         # (50, Quoted)
         st.session_state["hit_response_ids"] = [22, 22]
         st.session_state["hit_ops"] = ['Post Hoc', 'Post Hoc']
+        hit_df_rows = []
+        for i in range(len(st.session_state["hit_response_ids"])):
+            curr_response_id = st.session_state["hit_response_ids"][i]
+            curr_hit_op = st.session_state["hit_ops"][i]
+            curr_row = df[(df['ID']==curr_response_id)&(df['op']==curr_hit_op)]
+            hit_df_rows.append(curr_row)
+        hit_df = pd.concat(hit_df_rows, ignore_index=True)
+    elif ("All" == st.session_state["username"]):
+        # (50, Quoted)
+        st.session_state["hit_response_ids"] = [137, 139, 140, 141, 142, 143, 144] 
+        st.session_state["hit_ops"] = ['Snippet', 'Quoted', 'Entailed', 'Abstractive', 'Paraphrased', 'Gemini', 'Post Hoc']
         hit_df_rows = []
         for i in range(len(st.session_state["hit_response_ids"])):
             curr_response_id = st.session_state["hit_response_ids"][i]
