@@ -121,12 +121,19 @@ if (st.session_state["username"]):
         # st.session_state['annotator_db_str'] = 'mturk_qualified_all_mh_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
         # st.session_state['NUM_TRIALS_QUAL_ID'] = '33AQ1MMGKMJRC87O87UFO30GUQH1WG'
         # st.session_state["total_tasks"] = 7
-        # ALL ELI3G
-        conn = st.connection("gsheets_mturk_ALL_ELI3", type=GSheetsConnection) 
-        st.session_state['annotations_db'] = 'mturk_all_eli3_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
-        instances_to_annotate = 'mturk_all_eli3_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
-        st.session_state['annotator_db_str'] = 'mturk_qualified_all_eli3_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
-        st.session_state['NUM_TRIALS_QUAL_ID'] = '3SHVTVENCC25086JERQKVETHIULJSN'
+        # # ALL ELI3G
+        # conn = st.connection("gsheets_mturk_ALL_ELI3", type=GSheetsConnection) 
+        # st.session_state['annotations_db'] = 'mturk_all_eli3_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+        # instances_to_annotate = 'mturk_all_eli3_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
+        # st.session_state['annotator_db_str'] = 'mturk_qualified_all_eli3_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
+        # st.session_state['NUM_TRIALS_QUAL_ID'] = '3SHVTVENCC25086JERQKVETHIULJSN'
+        # st.session_state["total_tasks"] = 7
+        # ALL MASH
+        conn = st.connection("gsheets_mturk_ALL_MASH", type=GSheetsConnection) 
+        st.session_state['annotations_db'] = 'mturk_all_mash_uf_annotations' # mturk_all_mh_uf_annotations, mturk_all_eli3_uf_annotations, mturk_all_mash_uf_annotations
+        instances_to_annotate = 'mturk_all_mash_uf_ita' # mturk_all_mh_uf_ita, mturk_all_eli3_uf_ita, mturk_all_mash_uf_ita
+        st.session_state['annotator_db_str'] = 'mturk_qualified_all_mash_annotators' # mturk_qualified_all_mh_annotators, mturk_qualified_all_eli3_annotators, mturk_qualified_all_mash_annotators
+        st.session_state['NUM_TRIALS_QUAL_ID'] = '39J7LX74DTQNMBL3VB8YCWFDSAV3WA'
         st.session_state["total_tasks"] = 7
     else:
         st.session_state['annotator_db_str'] = 'annotators'
